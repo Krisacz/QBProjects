@@ -1,0 +1,19 @@
+﻿set folder="C:\IMRR\Error"
+cd /d %folder%
+for /F "delims=" %%i in ('dir /b') do (rmdir "%%i" /s/q || del "%%i" /s/q)
+
+set folder="C:\IMRR\Processed"
+cd /d %folder%
+for /F "delims=" %%i in ('dir /b') do (rmdir "%%i" /s/q || del "%%i" /s/q)
+
+set folder="C:\IMRR\ReadyForProclaim"
+cd /d %folder%
+for /F "delims=" %%i in ('dir /b') do (rmdir "%%i" /s/q || del "%%i" /s/q)
+
+set folder="C:\IMRR\ToBeChecked"
+cd /d %folder%
+for /F "delims=" %%i in ('dir /b') do (rmdir "%%i" /s/q || del "%%i" /s/q)
+
+set folder="C:\IMRR\Temp"
+cd /d %folder%
+for /F "delims=" %%i in ('dir /b') do (rmdir "%%i" /s/q || del "%%i" /s/q)
