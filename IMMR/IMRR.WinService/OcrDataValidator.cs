@@ -63,7 +63,7 @@ namespace IMRR.Lib
                     var cleanedString = CleanString(foundData.Value);
                     _logger.AddInfo(string.Format("Found correct data [Regex03]: {0}", cleanedString));
                     var result = string.Format("CL{0}", cleanedString);
-                    return new ValidateType(result, CorrectLevel.Generic);
+                    return new ValidateType(result, CorrectLevel.Partial);
                 }
 
                 if (_genericNewCaseRef.IsMatch(ocrData))
@@ -72,7 +72,7 @@ namespace IMRR.Lib
                     var cleanedString = CleanString(foundData.Value);
                     _logger.AddInfo(string.Format("Found correct data [Regex04]: {0}", cleanedString));
                     var result = string.Format("CL{0}", cleanedString);
-                    return new ValidateType(result, CorrectLevel.Generic);
+                    return new ValidateType(result, CorrectLevel.Partial);
                 }
 
                 if (_genericOldCaseRefWithoutPostfix.IsMatch(ocrData))
