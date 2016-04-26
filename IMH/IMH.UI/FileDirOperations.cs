@@ -69,9 +69,12 @@ namespace IMH.UI
             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
         }
 
-        private void WaitReady(string fileName)
+        public void WaitReady(string fileName)
         {
-            while (true)
+            var tries = 0;
+            var maxTries = 10;
+
+            while (true && tries < maxTries)
             {
                 try
                 {
@@ -96,6 +99,7 @@ namespace IMH.UI
                 {
                     System.Diagnostics.Trace.WriteLine(string.Format("File {0} not yet ready ({1})", fileName, ex.Message));
                 }
+                tries++;
                 Thread.Sleep(500);
             }
         }
