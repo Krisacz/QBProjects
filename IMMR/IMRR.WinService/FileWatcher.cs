@@ -54,7 +54,8 @@ namespace IMRR.Lib
                 Path = _settings.IncomingFolderPath,
                 NotifyFilter = NotifyFilters.FileName,
                 Filter = _settings.InboundFilesFilter,
-                EnableRaisingEvents = true
+                EnableRaisingEvents = true,
+                InternalBufferSize = 65536
             };
 
             watcher.Created += OnCreated; 
