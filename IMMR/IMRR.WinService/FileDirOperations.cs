@@ -22,7 +22,7 @@ namespace IMRR.Lib
             //Making sure that EVERY file can get to processed dir
             var fileNameOnly = Path.GetFileNameWithoutExtension(filePath);
             var extension = Path.GetExtension(filePath);
-            var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 4);
+            var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 6);
             var processedFileName = string.Format("{0}#{1}{2}", fileNameOnly, uniqueEnd, extension);
             var processedFilePath = Path.Combine(_settings.ProcessedFolderPath, processedFileName);
             Move(filePath, processedFilePath);
@@ -33,7 +33,7 @@ namespace IMRR.Lib
             //Making sure that EVERY file can get to error dir
             var fileNameOnly = Path.GetFileNameWithoutExtension(filePath);
             var extension = Path.GetExtension(filePath);
-            var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 4);
+            var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 6);
             var errorFileName = string.Format("{0}#{1}{2}", fileNameOnly, uniqueEnd, extension);
             var errorFilePath = Path.Combine(_settings.ErrorFolderPath, errorFileName);
             Move(filePath, errorFilePath);
@@ -68,7 +68,7 @@ namespace IMRR.Lib
         public string SaveImage(string scannedFile, Image image)
         {
             var fileName = Path.GetFileNameWithoutExtension(scannedFile);
-            var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 4);
+            var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 6);
             var tempImageFileName = string.Format("{0}#{1}{2}", fileName, uniqueEnd, ".jpg");
             var imageFilePath = Path.Combine(_settings.TempFolderPath, tempImageFileName);
             _logger.AddInfo(string.Format("Saving image: {0}", imageFilePath));
@@ -89,7 +89,7 @@ namespace IMRR.Lib
         public void CopyAndRenameScannedFile(string scannedFile, ValidateType validateType)
         {
             var extension = Path.GetExtension(scannedFile);
-            var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 4);
+            var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 6);
             var fileName = string.Format("{0}_#{1}{2}", validateType.Name, uniqueEnd, extension);
 
             string targetPath = null;
