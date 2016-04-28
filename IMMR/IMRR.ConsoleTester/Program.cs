@@ -31,7 +31,7 @@ namespace IMRR.ConsoleTester
 
     class Program
     {
-        private static bool _debug = false;    
+        private static bool _debug = true;    
 
         static void Main(string[] args)
         {

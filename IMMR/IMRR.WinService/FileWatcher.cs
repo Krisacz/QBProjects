@@ -181,10 +181,12 @@ namespace IMRR.Lib
         private void OnProcessFile(string scannedFile)
         {
             //Check if file already doesn't exist in process folder
+            /* NOT checking for it - all files will end up in processed folder due to the fact that they will receive unique name
             if (FileDirOperations.FileAlreadyExistInDir(scannedFile, _settings.ProcessedFolderPath))
             {
                 throw new Exception(string.Format("File {0} alredy exist in {1}", scannedFile, _settings.ProcessedFolderPath));
             }
+            */
             
             //Extracting images
             var imageExtractor = new ImageExtractor(_logger);
