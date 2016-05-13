@@ -17,12 +17,12 @@ namespace IMH.UI
             _settings = settings;
         }
         
-        public void MoveToSubmittedFolder(string filePath, string caseRef)
+        public void MoveToSubmittedFolder(string filePath, string prefix, string caseRef)
         {
             //Making sure that EVERY file can get to processed dir
             var extension = Path.GetExtension(filePath);
             var uniqueEnd = Guid.NewGuid().ToString().Substring(0, 4);
-            var submittedFileName = string.Format("{0}{1}_#{2}{3}", "CL", caseRef, uniqueEnd, extension);
+            var submittedFileName = string.Format("{0}{1}_#{2}{3}", prefix, caseRef, uniqueEnd, extension);
             var subbmitedFilePath = Path.Combine(_settings.SubmittedFilesFolederPath, submittedFileName);
             Move(filePath, subbmitedFilePath);
         }

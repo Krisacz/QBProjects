@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Correspondent.cs" />
     <Compile Include="FileDirOperations.cs" />
     <Compile Include="AuditLogger.cs" />
     <Compile Include="FileLogger.cs" />

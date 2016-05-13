@@ -23,8 +23,11 @@ namespace IMH.UI
                 var exceptionFilesPath = ConfigurationManager.AppSettings["ExceptionFilesPath"];
                 logger.AddInfo(string.Format("ExceptionFilesPath: {0}", exceptionFilesPath));
 
+                var correspondentsDataFilesPath = ConfigurationManager.AppSettings["CorrespondentsDataFilesPath"];
+                logger.AddInfo(string.Format("CorrespondentsDataFilesPath: {0}", correspondentsDataFilesPath));
+
                 logger.AddInfo("Config file valid.");
-                return new Settings(pdfFilesFolderPath, submittedFilesFolederPath, unknownCaseRefFilesPath, exceptionFilesPath);
+                return new Settings(pdfFilesFolderPath, submittedFilesFolederPath, unknownCaseRefFilesPath, exceptionFilesPath, correspondentsDataFilesPath);
             }
             catch (Exception ex)
             {
