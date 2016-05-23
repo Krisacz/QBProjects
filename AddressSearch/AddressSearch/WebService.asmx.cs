@@ -21,12 +21,16 @@ namespace AddressSearch
         {
             const int MaxNumberLength = 4;
             const int MaxPostcodeLength = 8;
-                                    
-            if (number.Length > MaxNumberLength) number = number.Substring(0, MaxNumberLength);
-            if (postcode.Length > MaxPostcodeLength) postcode = postcode.Substring(0, MaxPostcodeLength);
+            var result = string.Empty;
 
-            var result = SqlAccess.GetFullAddress(number, postcode.ToUpper());
+            //Check input paramaeters length
+            if (number != null && number.Length > MaxNumberLength) result = string.Format("ERROR: Number length > {0}", MaxNumberLength);
+            if (postcode != null && postcode.Length > MaxPostcodeLength) result = string.Format("ERROR: Postcode length > {0}", MaxPostcodeLength);
 
+            //If no errors - query SQL
+            if (!result.StartsWith("ERROR")) result = SqlAccess.GetFullAddress(number ?? string.Empty, postcode.ToUpper());
+
+            //If no errors - format output
             if (!result.StartsWith("ERROR"))
             {
                 var fullAddress = string.Empty;
@@ -43,7 +47,10 @@ namespace AddressSearch
                 result = fullAddress;
             }
 
+            //Last check
+            if (string.IsNullOrWhiteSpace(result)) result = string.Format("ERROR: Incorrect number/postcode.");
 
+            //Return
             return result;
         }
     }

@@ -14,6 +14,8 @@ namespace IMH.UI
         private FileDirOperations FileDirOperations { get; set; }
         private readonly Regex _regexOldCaseRef = new Regex("^[1]{1}[0-9]{5}[\\.]{1}[0-9]{3}$", RegexOptions.Compiled);
         private readonly Regex _regexNewCaseRef = new Regex("^[3]{1}[0-9]{5}$", RegexOptions.Compiled);
+        private readonly Regex _regexTestCaseRef = new Regex("^[4]{1}[0-9]{5}$", RegexOptions.Compiled);
+        private Correspondents _correspondents;
 
         public Form1()
         {
@@ -27,9 +29,18 @@ namespace IMH.UI
             Auditor = new AuditLogger();
             FileDirOperations = new FileDirOperations(Logger, Settings);
             FileDirOperations.CreateDirsIfNotExist();
+            InitCorrespondents();
             RefreshView();
             Logger.AddInfo(string.Format("{0} Started", this.Text));
             Auditor.AddInfo(string.Format("1,{0} Started", this.Text));
+        }
+
+        private void InitCorrespondents()
+        {
+            _correspondents = new Correspondents();
+            _correspondents.Init(Settings.CorrespondentsDataFilesPath);
+            CorrComboBox.Items.AddRange(_correspondents.GetDescList().ToArray());
+            CorrComboBox.SelectedIndex = 0;
         }
 
         private void RefreshFiles()
@@ -135,7 +146,7 @@ namespace IMH.UI
             else
             {
                 Auditor.AddInfo(string.Format("20,User submitted PDF file. Case Ref: [{0}] - PDF File [{1}]", OcrCaseRefTextBox.Text, (string)FilesListBox.SelectedItem));
-                FileDirOperations.MoveToSubmittedFolder((string)FilesListBox.SelectedItem, CorrectCaseRefTextBox.Text);
+                FileDirOperations.MoveToSubmittedFolder((string)FilesListBox.SelectedItem, _correspondents.GetValue((string)CorrComboBox.SelectedItem), CorrectCaseRefTextBox.Text);
                 RefreshView();
             }
         }
@@ -145,6 +156,7 @@ namespace IMH.UI
             if (string.IsNullOrEmpty(CorrectCaseRefTextBox.Text)) return false;
             if (_regexOldCaseRef.IsMatch(CorrectCaseRefTextBox.Text)) return true;
             if (_regexNewCaseRef.IsMatch(CorrectCaseRefTextBox.Text)) return true;
+            if (_regexTestCaseRef.IsMatch(CorrectCaseRefTextBox.Text)) return true;
             return false;
         }
 
@@ -164,6 +176,11 @@ namespace IMH.UI
             UnknownCaseRefButton.Enabled = true;
             Auditor.AddInfo(string.Format("10,User discarded OCR Case Ref: {0}", OcrCaseRefTextBox.Text));
             FileDirOperations.CopyException((string)FilesListBox.SelectedItem);
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
