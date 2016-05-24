@@ -59,6 +59,11 @@
     <Compile Include="Log\ILogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Validation\FieldType.cs" />
+    <Compile Include="Validation\IValidation.cs" />
+    <Compile Include="Validation\Validation.cs" />
+    <Compile Include="Validation\Validations.cs" />
+    <Compile Include="Validation\Validator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

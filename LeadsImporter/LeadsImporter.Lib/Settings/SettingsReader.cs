@@ -28,13 +28,16 @@ namespace LeadsImporter.Lib.Settings
                 logger.AddInfo($"SettingsReader >>> Read: ReportsSettingsFilePath: {proclaimProcessFolderPath}");
 
                 var aquariumUsername = ConfigurationManager.AppSettings["AquariumUsername"];
-                logger.AddInfo($"SettingsReader >>> Read: AquariumUsername: {proclaimProcessFolderPath}");
+                logger.AddInfo($"SettingsReader >>> Read: AquariumUsername: {aquariumUsername}");
 
                 var aquariumPassword = ConfigurationManager.AppSettings["AquariumPassword"];
-                logger.AddInfo($"SettingsReader >>> Read: AquariumPassword: {proclaimProcessFolderPath}");
+                logger.AddInfo($"SettingsReader >>> Read: AquariumPassword: {aquariumPassword}");
+
+                var validationFilesPath = ConfigurationManager.AppSettings["ValidationFilesPath"];
+                logger.AddInfo($"SettingsReader >>> Read: ValidationFilesPath: {validationFilesPath}");
 
                 logger.AddInfo("SettingsReader >>> Read: Config file valid.");
-                return new Settings(incomingFolderPath, processedFolderPath, toBeCheckedPath, errorFolderPath, proclaimProcessFolderPath, aquariumUsername, aquariumPassword);
+                return new Settings(incomingFolderPath, processedFolderPath, toBeCheckedPath, errorFolderPath, proclaimProcessFolderPath, aquariumUsername, aquariumPassword, validationFilesPath);
             }
             catch (Exception ex)
             {

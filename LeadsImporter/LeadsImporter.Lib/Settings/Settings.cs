@@ -9,8 +9,9 @@
         public string ReportsSettingsFilePath { get; private set; }
         public string AquariumUsername { get; private set; }
         public string AquariumPassword { get; private set; }
+        public string ValidationFilesPath { get; private set; }
 
-        public Settings(string sqlConnectionString, string tempCachePath, string poolingTimeInSec, string logFilePath, string reportsSettingsFilePath, string aquariumUsername, string aquariumPassword)
+        public Settings(string sqlConnectionString, string tempCachePath, string poolingTimeInSec, string logFilePath, string reportsSettingsFilePath, string aquariumUsername, string aquariumPassword, string validationFilesPath)
         {
             SqlConnectionString = sqlConnectionString;
             TempCachePath = tempCachePath;
@@ -19,6 +20,7 @@
             ReportsSettingsFilePath = reportsSettingsFilePath;
             AquariumUsername = aquariumUsername;
             AquariumPassword = aquariumPassword;
+            ValidationFilesPath = validationFilesPath;
         }
     }
 }

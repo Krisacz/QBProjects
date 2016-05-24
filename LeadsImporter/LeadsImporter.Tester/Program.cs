@@ -16,17 +16,17 @@ namespace LeadsImporter.Tester
     {
         static void Main(string[] args)
         {
-            var logger = new ConsoleLogger();
-            var settings = SettingsReader.Read(logger);
-            var ws = new WebService(settings, logger);
+            //var logger = new ConsoleLogger();
+            //var settings = SettingsReader.Read(logger);
+            //var ws = new WebService(settings, logger);
 
-            ws.GetReport();
+            //ws.GetReport();
 
-            Console.WriteLine();
-            Console.WriteLine("Done!");
-            Console.ReadKey();
+            //Console.WriteLine();
+            //Console.WriteLine("Done!");
+            //Console.ReadKey();
 
-            //Run(true);
+            Run(true);
         }
 
         #region RUN

@@ -1,8 +1,10 @@
-﻿using LeadsImporter.Lib.Cache;
+﻿using System.Runtime.InteropServices;
+using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Executer;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
 using LeadsImporter.Lib.Settings;
+using LeadsImporter.Lib.Validation;
 
 namespace LeadsImporter.Lib.AppController
 {
@@ -15,8 +17,9 @@ namespace LeadsImporter.Lib.AppController
             var logger = new ConsoleLogger();
             var settings = SettingsReader.Read(logger);
             var reportsSettings = new ReportsSettings(settings, logger).ReadAll();
-            var cache = new InMemoryCache();            
-            _executer = new TimerExecuter(settings, logger, reportsSettings, cache);
+            var cache = new InMemoryCache();
+            var validator = new Validator(logger, settings).ReadAll();          
+            _executer = new TimerExecuter(settings, logger, reportsSettings, cache, validator);
         }
         
         public void Start()

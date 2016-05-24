@@ -24,6 +24,7 @@ namespace LeadsImporter.Lib.Report
             try
             {
                 _logger.AddInfo("ReportsSettings >>> ReadAll: Reading reports settings file...");
+                CreateIfNotExist();
                 var lines = File.ReadAllLines(_settings.ReportsSettingsFilePath);
                 for (var i = 0; i < lines.Length; i++)
                 {
@@ -43,6 +44,11 @@ namespace LeadsImporter.Lib.Report
             return this;
         }
 
+        private void CreateIfNotExist()
+        {
+            File.WriteAllLines(_settings.ReportsSettingsFilePath, new []{ "Type,ReportId,ExecutionSequence,LeadIdColumnName,ClientIdColumnName,LenderIdColumnName,DateOfCreditColumnName,DateTimeLeadCreatedColumnName,ProclaimDropPath" });
+        }
+
         private ReportSettings MapReportSettings(string line, int i)
         {
             try
@@ -54,25 +60,23 @@ namespace LeadsImporter.Lib.Report
                 var type = parts[0];
                 var aquariumQueryId = parts[1];
                 var executionSequnece = parts[2];
-                var leadIdIndex = Parse(parts[3]);
-                var clientIdIndex = Parse(parts[4]);
-                var lenderIdIndex = Parse(parts[5]);
-                var dateOfCreditIndex = Parse(parts[6]);
-                var loanAmountIndex = Parse(parts[7]);
-                var dateTimeLeadCreateIndex = Parse(parts[8]);
-                var proclaimDropPath = parts[9];
+                var leadIdColumnName = parts[3];
+                var clientIdColumnName = parts[4];
+                var lenderIdColumnName = parts[5];
+                var dateOfCreditColumnName = parts[6];
+                var dateTimeLeadCreatedColumnName =parts[7];
+                var proclaimDropPath = parts[8];
 
                 return new ReportSettings()
                 {
                     Type = type,
                     AquariumQueryId = aquariumQueryId,
-                    ExecutionSequnece = executionSequnece,
-                    LeadIdIndex = leadIdIndex,
-                    ClientIdIndex = clientIdIndex,
-                    LenderIdIndex = lenderIdIndex,
-                    DateOfCreditIndex = dateOfCreditIndex,
-                    LoanAmountIndex = loanAmountIndex,
-                    DateTimeLeadCreateIndex = dateTimeLeadCreateIndex,
+                    ExecutionSequnece = Parse(executionSequnece),
+                    LeadIdColumnName = leadIdColumnName,
+                    ClientIdColumnName = clientIdColumnName,
+                    LenderIdColumnName = lenderIdColumnName,
+                    DateOfCreditColumnName = dateOfCreditColumnName,
+                    DateTimeLeadCreatedColumnName = dateTimeLeadCreatedColumnName,
                     ProclaimDropPath = proclaimDropPath
                 };
             }

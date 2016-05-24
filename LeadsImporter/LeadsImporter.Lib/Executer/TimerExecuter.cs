@@ -1,9 +1,12 @@
 using System;
+using System.Threading;
 using System.Timers;
 using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
+using LeadsImporter.Lib.Validation;
 using static System.Double;
+using Timer = System.Timers.Timer;
 
 namespace LeadsImporter.Lib.Executer
 {
@@ -13,9 +16,10 @@ namespace LeadsImporter.Lib.Executer
         private readonly ILogger _logger;
         private readonly ReportsSettings _reportsSettings;
         private readonly ICache _cache;
+        private readonly Validator _validator;
         private readonly Timer _timer;
 
-        public TimerExecuter(Settings.Settings settings, ILogger logger, ReportsSettings reportsSettings, ICache cache)
+        public TimerExecuter(Settings.Settings settings, ILogger logger, ReportsSettings reportsSettings, ICache cache, Validator validator)
         {
             try
             {
@@ -23,10 +27,11 @@ namespace LeadsImporter.Lib.Executer
                 _logger = logger;
                 _reportsSettings = reportsSettings;
                 _cache = cache;
+                _validator = validator;
 
                 _timer = new Timer();
                 _timer.Elapsed += Execute;
-                _timer.Interval = Parse(settings.PoolingTimeInSec);
+                _timer.Interval = Parse(settings.PoolingTimeInSec) * 1000;
             }
             catch (Exception ex)
             {
@@ -69,10 +74,18 @@ namespace LeadsImporter.Lib.Executer
         {
             try
             {
+                _timer.Enabled = false;
+
                 _logger.AddInfo("TimerExecuter >>> Execute: Executing...");
 
                 //TODO Do stuff
                 _logger.AddInfo("TimerExecuter >>> Execute: DO STUFF");
+                _logger.AddInfo("TimerExecuter >>> Execute: Start sleep for 15 seconds...");
+                Thread.Sleep(15 * 1000);
+                _logger.AddInfo("TimerExecuter >>> Execute: Sleep stopped!");
+
+
+                _timer.Enabled = true;
             }
             catch (Exception ex)
             {
