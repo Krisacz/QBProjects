@@ -10,19 +10,11 @@ namespace LeadsImporter.Lib.Report
     {
         public List<string> Headers;
         public List<ReportDataRow> Rows;
-        public ReportData(List<string> headers, List<ReportDataRow> rows)
-        {
-            Headers = headers;
-            Rows = rows;
-        }
+
     }
 
     public class ReportDataRow
     {
         public List<string> Data;
-        public ReportDataRow(List<string> data)
-        {
-            Data = data;
-        }
     }
 }

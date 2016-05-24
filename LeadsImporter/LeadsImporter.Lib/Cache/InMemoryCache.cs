@@ -1,4 +1,5 @@
 ﻿using System;
+using LeadsImporter.Lib.Report;
 
 namespace LeadsImporter.Lib.Cache
 {
@@ -9,7 +10,7 @@ namespace LeadsImporter.Lib.Cache
             throw new NotImplementedException();
         }
 
-        public void Store(string data)
+        public void Store(ReportData data)
         {
             throw new NotImplementedException();
         }

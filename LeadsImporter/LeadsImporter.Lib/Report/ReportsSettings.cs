@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LeadsImporter.Lib.Log;
 using static System.Int32;
 
@@ -8,15 +9,15 @@ namespace LeadsImporter.Lib.Report
 {
     public class ReportsSettings
     {
-        private readonly List<ReportSettings> _all;
-        private readonly Settings.Settings _settings;
         private readonly ILogger _logger;
+        private readonly Settings.Settings _settings;
+        private readonly List<ReportSettings> _all;
 
-        public ReportsSettings(Settings.Settings settings, ILogger logger)
+        public ReportsSettings(ILogger logger, Settings.Settings settings)
         {
             _all = new List<ReportSettings>();
-            _settings = settings;
             _logger = logger;
+            _settings = settings;
         }
 
         public ReportsSettings ReadAll()
@@ -46,7 +47,9 @@ namespace LeadsImporter.Lib.Report
 
         private void CreateIfNotExist()
         {
-            File.WriteAllLines(_settings.ReportsSettingsFilePath, new []{ "Type,ReportId,ExecutionSequence,LeadIdColumnName,ClientIdColumnName,LenderIdColumnName,DateOfCreditColumnName,DateTimeLeadCreatedColumnName,ProclaimDropPath" });
+            if(File.Exists(_settings.ReportsSettingsFilePath)) return;
+            File.WriteAllLines(_settings.ReportsSettingsFilePath,
+                new []{ "Type,ReportId,ExecutionSequence,LeadIdColumnName,ClientIdColumnName,LenderIdColumnName,DateOfCreditColumnName,DateTimeLeadCreatedColumnName,ProclaimDropPath" });
         }
 
         private ReportSettings MapReportSettings(string line, int i)
@@ -86,6 +89,11 @@ namespace LeadsImporter.Lib.Report
             }
 
             return null;
+        }
+
+        public List<string> GetReportsId()
+        {
+            return _all.Select(x => x.AquariumQueryId).ToList();
         }
     }
 }

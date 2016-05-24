@@ -15,30 +15,33 @@ namespace LeadsImporter.Lib.Aquarium
 {
     public class WebService
     {
-        private readonly Settings.Settings _settings;
         private readonly ILogger _logger;
+        private readonly Settings.Settings _settings;
 
-        public WebService(Settings.Settings settings, ILogger logger)
+        public WebService(ILogger logger, Settings.Settings settings)
         {
-            _settings = settings;
             _logger = logger;
+            _settings = settings;
         }
 
         #region FLOW
-        public void GetReport()
+        public ReportData GetReportData(string reportId)
         {
             try
             {
                 //var response = GetReport("38375");//RPPI
-                var response = GetReport("38379");//URSC
+                //var response = GetReport("38379");//URSC
+                var response = GetReport(reportId);//URSC
                 var headers = GetReportHeaders(response);
                 var dataRows = GetReportDataRows(response);
-                var report = new ReportData(headers, dataRows);
+                return new ReportData() {Headers = headers, Rows = dataRows};
             }
             catch (Exception ex)
             {
                 _logger.AddError($"WebService >>> GetReport: {ex.Message}");
             }
+
+            return null;
         }
 
         private string GetReport(string queryId)
@@ -325,7 +328,7 @@ namespace LeadsImporter.Lib.Aquarium
                     {
                         data.Add(d.InnerText);
                     }
-                    dataRows.Add(new ReportDataRow(data));
+                    dataRows.Add(new ReportDataRow() {Data = data});
                 }
                 return dataRows;
             }

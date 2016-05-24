@@ -1,4 +1,5 @@
 ﻿using System;
+using LeadsImporter.Lib.Aquarium;
 using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Executer;
 using LeadsImporter.Lib.Log;
@@ -16,10 +17,11 @@ namespace LeadsImporter.Lib.AppController
         {
             var logger = new FileLogger();
             var settings = SettingsReader.Read(logger);
-            var reportsSettings = new ReportsSettings(settings, logger).ReadAll();
-            var cache = new InMemoryCache();
+            var reportsSettings = new ReportsSettings(logger, settings).ReadAll();
+            var cache = new FileCache(logger, settings);
             var validator = new Validator(logger, settings).ReadAll();
-            _executer = new TimerExecuter(settings, logger, reportsSettings, cache, validator);
+            var webService = new WebService(logger, settings);
+            _executer = new TimerExecuter(logger, settings, reportsSettings, cache, validator, webService);
         }
 
         public void Start()

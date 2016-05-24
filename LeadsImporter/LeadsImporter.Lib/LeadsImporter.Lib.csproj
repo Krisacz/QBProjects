@@ -46,6 +46,7 @@
     <Compile Include="AppController\IAppController.cs" />
     <Compile Include="AppController\WinServiceAppController.cs" />
     <Compile Include="Aquarium\WebService.cs" />
+    <Compile Include="Cache\FileCache.cs" />
     <Compile Include="Cache\ICache.cs" />
     <Compile Include="Cache\InMemoryCache.cs" />
     <Compile Include="Executer\IExecuter.cs" />

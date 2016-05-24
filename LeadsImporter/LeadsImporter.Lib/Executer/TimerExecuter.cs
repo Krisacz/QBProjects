@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Timers;
+using LeadsImporter.Lib.Aquarium;
 using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
@@ -12,22 +13,24 @@ namespace LeadsImporter.Lib.Executer
 {
     public class TimerExecuter : IExecuter
     {
-        private readonly Settings.Settings _settings;
         private readonly ILogger _logger;
+        private readonly Settings.Settings _settings;
         private readonly ReportsSettings _reportsSettings;
         private readonly ICache _cache;
         private readonly Validator _validator;
+        private readonly WebService _webService;
         private readonly Timer _timer;
 
-        public TimerExecuter(Settings.Settings settings, ILogger logger, ReportsSettings reportsSettings, ICache cache, Validator validator)
+        public TimerExecuter(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings, ICache cache, Validator validator, WebService webService)
         {
             try
             {
-                _settings = settings;
                 _logger = logger;
+                _settings = settings;
                 _reportsSettings = reportsSettings;
                 _cache = cache;
                 _validator = validator;
+                _webService = webService;
 
                 _timer = new Timer();
                 _timer.Elapsed += Execute;
@@ -75,21 +78,21 @@ namespace LeadsImporter.Lib.Executer
             try
             {
                 _timer.Enabled = false;
+                _logger.AddInfo("TimerExecuter >>> Execute: (Waking up) Executing...");
+                
+                var reportData = _webService.GetReportData(_reportsSettings.GetReportsId()[0]);
+                _cache.Store(reportData);
 
-                _logger.AddInfo("TimerExecuter >>> Execute: Executing...");
-
-                //TODO Do stuff
-                _logger.AddInfo("TimerExecuter >>> Execute: DO STUFF");
-                _logger.AddInfo("TimerExecuter >>> Execute: Start sleep for 15 seconds...");
-                Thread.Sleep(15 * 1000);
-                _logger.AddInfo("TimerExecuter >>> Execute: Sleep stopped!");
-
-
+                _logger.AddInfo("TimerExecuter >>> Execute: (Sleeping) Finished.");
                 _timer.Enabled = true;
             }
             catch (Exception ex)
             {
                 _logger.AddError($"TimerExecuter >>> Execute: {ex.Message}");
+            }
+            finally
+            {
+                _timer.Enabled = true;
             }
         }
     }
