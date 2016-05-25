@@ -10,6 +10,6 @@ namespace LeadsImporter.Lib.Cache
     {
         void Clear();
         void Store(ReportData data);
-        string Get();
+        ReportData Get(string xmlPath);
     }
 }

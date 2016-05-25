@@ -23,30 +23,23 @@ namespace LeadsImporter.Lib.Executer
 
         public TimerExecuter(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings, ICache cache, Validator validator, WebService webService)
         {
-            try
-            {
-                _logger = logger;
-                _settings = settings;
-                _reportsSettings = reportsSettings;
-                _cache = cache;
-                _validator = validator;
-                _webService = webService;
+            _logger = logger;
+            _settings = settings;
+            _reportsSettings = reportsSettings;
+            _cache = cache;
+            _validator = validator;
+            _webService = webService;
 
-                _timer = new Timer();
-                _timer.Elapsed += Execute;
-                _timer.Interval = Parse(settings.PoolingTimeInSec) * 1000;
-            }
-            catch (Exception ex)
-            {
-                logger.AddError($"TimerExecuter >>> Init: {ex.Message}");
-            }
+            _timer = new Timer();
+            _timer.Elapsed += Execute;
+            _timer.Interval = Parse(settings.PoolingTimeInSec) * 1000;
         }
 
         public void Start()
         {
             try
             {
-                _logger.AddInfo("TimerExecuter >>> Start: Started executer timer.");
+                _logger.AddInfo("TimerExecuter >>> Start: Starting timer...");
                 _timer.Enabled = true;
             }
             catch (Exception ex)
@@ -59,7 +52,7 @@ namespace LeadsImporter.Lib.Executer
         {
             try
             {
-                _logger.AddInfo("TimerExecuter >>> Stop: Stopped executer timer.");
+                _logger.AddInfo("TimerExecuter >>> Stop: Stopping timer...");
                 _timer.Enabled = true;
             }
             catch (Exception ex)
@@ -78,12 +71,18 @@ namespace LeadsImporter.Lib.Executer
             try
             {
                 _timer.Enabled = false;
-                _logger.AddInfo("TimerExecuter >>> Execute: (Waking up) Executing...");
-                
-                var reportData = _webService.GetReportData(_reportsSettings.GetReportsId()[0]);
-                _cache.Store(reportData);
+                _logger.AddInfo("TimerExecuter >>> Execute: (Waking up)");
+                _logger.AddInfo("TimerExecuter >>> Execute: Executing...");
 
-                _logger.AddInfo("TimerExecuter >>> Execute: (Sleeping) Finished.");
+                //Debug
+                _logger.AddInfo("TimerExecuter >>> Execute: Doing Stuff...");
+                Thread.Sleep(3 * 1000);
+                _logger.AddInfo("TimerExecuter >>> Execute: Doing Stuff Completed!");
+                //var reportData = _webService.GetReportData(_reportsSettings.GetReportsId()[0]);
+                //_cache.Store(reportData);
+
+                _logger.AddInfo("TimerExecuter >>> Execute: Finished!");
+                _logger.AddInfo("TimerExecuter >>> Execute: (Sleeping)");
                 _timer.Enabled = true;
             }
             catch (Exception ex)

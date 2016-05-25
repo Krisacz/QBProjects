@@ -15,7 +15,7 @@ namespace LeadsImporter.Lib.Cache
             throw new NotImplementedException();
         }
 
-        public string Get()
+        public ReportData Get(string xmlPath)
         {
             throw new NotImplementedException();
         }

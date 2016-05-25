@@ -20,13 +20,24 @@ namespace LeadsImporter.Lib.Cache
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            try
+            {
+                _logger.AddInfo($"FileCache >>> Clear: Clearing all cache data...");
+                var di = new DirectoryInfo(_settings.TempCachePath);
+                foreach (var file in di.GetFiles()) file.Delete();
+                foreach (var dir in di.GetDirectories()) dir.Delete(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"FileCache >>> Store: {ex.Message}");
+            }
         }
 
         public void Store(ReportData data)
         {
             try
             {
+                _logger.AddInfo($"FileCache >>> Store: Caching data...");
                 Directory.CreateDirectory(_settings.TempCachePath);
                 var serializer = new XmlSerializer(typeof(ReportData));
                 var xmlWriterSettings = new XmlWriterSettings {Indent = true, IndentChars = "  ", NewLineChars = "\r\n", NewLineHandling = NewLineHandling.Replace };
@@ -45,9 +56,24 @@ namespace LeadsImporter.Lib.Cache
             }
         }
 
-        public string Get()
+        public ReportData Get(string path)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _logger.AddInfo($"FileCache >>> Get[{path}]: Getting data...");
+                ReportData data = null;
+                var xmlSerializer = new XmlSerializer(typeof(ReportData));
+                var streamReader = new StreamReader(path);
+                data = (ReportData)xmlSerializer.Deserialize(streamReader);
+                streamReader.Close();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"FileCache >>> Get[{path}]: {ex.Message}");
+            }
+
+            return null;
         }
     }
 }

@@ -34,7 +34,7 @@ namespace LeadsImporter.Lib.Validation
                     var lines = File.ReadAllLines(validationFile);
                     if (IsFileValid(lines, validationFile))
                     {
-                        var validation = ParseValidationFile(lines);
+                        var validation = ParseValidationFile(lines, validationFile);
                         _validations.Add(validation);
                     }
                     else
@@ -55,92 +55,110 @@ namespace LeadsImporter.Lib.Validation
 
         private void CreateIfNotExist()
         {
-            if (!Directory.Exists(_settings.ValidationFilesPath))
+            try
             {
+                if (Directory.Exists(_settings.ValidationFilesPath)) return;
+                _logger.AddInfo($"Validator >>> CreateIfNotExist: {_settings.ValidationFilesPath} does't exist - creating new folder...");
                 Directory.CreateDirectory(_settings.ValidationFilesPath);
-                var readMeStr = new List<string>();
-
-                #region READ ME TEXT
-                readMeStr.Add(@"1. File extension needs to be "".val"" (name doesn't matter)");
-                readMeStr.Add(@"2. Mendatory Lines:");
-                readMeStr.Add(@"		1-> Aquarium Report Id");
-                readMeStr.Add(@"		2-> Name of the column/header");
-                readMeStr.Add(@"		3-> TRUE or FALSE - Can this fields be empty? (not case sensitive)");
-                readMeStr.Add(@"		4-> Type of field: STRING, FIXED, DATE, VALUE (not case sensitive)");
-                readMeStr.Add(@"3. Optional Lines if field type is:");
-                readMeStr.Add(@"		STRING:");
-                readMeStr.Add(@"			5-> Minimum Length (can be empty)");
-                readMeStr.Add(@"			6-> Maximum Length (can be empty)");
-                readMeStr.Add(@"			");
-                readMeStr.Add(@"		FIXED:");
-                readMeStr.Add(@"			5-> String as allowed value (not case sensitive)");
-                readMeStr.Add(@"			6+  Any additional lines will add allowed values");
-                readMeStr.Add(@"		");
-                readMeStr.Add(@"		DATE:");
-                readMeStr.Add(@"			5-> Minimum date value in format dd/MM/yyyy (can be empty)");
-                readMeStr.Add(@"			6-> Maximum date value in format dd/MM/yyyy (can be empty)");
-                readMeStr.Add(@"			7-> Minimum number of years from today to value(can be empty)");
-                readMeStr.Add("");
-                readMeStr.Add(@"		VALUE:");
-                readMeStr.Add(@"			5-> Minimum value (numbers only, no commas or currency symbols, can be empty)");
-                readMeStr.Add(@"			6-> Maximum value (numbers only, no commas or currency symbols, can be empty)");
-                readMeStr.Add(@"-----------------------------------------------------------------------------------------");
-                readMeStr.Add(@"Example 1:");
-                readMeStr.Add(@"----------");
-                readMeStr.Add(@"321321");
-                readMeStr.Add(@"DOB");
-                readMeStr.Add(@"FALSE");
-                readMeStr.Add(@"DATE");
-                readMeStr.Add("");
-                readMeStr.Add("");
-                readMeStr.Add(@"18");
-                readMeStr.Add(@"----------");
-                readMeStr.Add(@"Above validation will make sure that field in column named ""DOB"" will not be empty");
-                readMeStr.Add(@"and number of years from today is no less than 18.");
-                readMeStr.Add(@"-----------------------------------------------------------------------------------------");
-                readMeStr.Add(@"Example 2:");
-                readMeStr.Add(@"----------");
-                readMeStr.Add(@"321321");
-                readMeStr.Add(@"URSC-Q1");
-                readMeStr.Add(@"FALSE");
-                readMeStr.Add(@"FIXED");
-                readMeStr.Add(@"Yes");
-                readMeStr.Add(@"No");
-                readMeStr.Add(@"----------");
-                readMeStr.Add(@"Above validation will make sure that field in column named ""URSC - Q1"" will not be empty and ");
-                readMeStr.Add(@"will contain value ""Yes"" or ""No"".");    
-                #endregion
-
+                var readMeStr = new List<string>
+                {
+                    #region READ ME TEXT
+                    @"1. File extension needs to be "".val"" (name doesn't matter)",
+                    @"2. Mendatory Lines:",
+                    @"		1-> Aquarium Report Id",
+                    @"		2-> Name of the column/header",
+                    @"		3-> TRUE or FALSE - Can this fields be empty? (not case sensitive)",
+                    @"		4-> Type of field: STRING, FIXED, DATE, VALUE (not case sensitive)",
+                    @"3. Optional Lines if field type is:",
+                    @"		STRING:",
+                    @"			5-> Minimum Length (can be empty)",
+                    @"			6-> Maximum Length (can be empty)",
+                    @"			",
+                    @"		FIXED:",
+                    @"			5-> String as allowed value (not case sensitive)",
+                    @"			6+  Any additional lines will add allowed values",
+                    @"		",
+                    @"		DATE:",
+                    @"			5-> Minimum date value in format dd/MM/yyyy (can be empty)",
+                    @"			6-> Maximum date value in format dd/MM/yyyy (can be empty)",
+                    @"			7-> Minimum number of years from today to value(can be empty)",
+                    "",
+                    @"		VALUE:",
+                    @"			5-> Minimum value (numbers only, no commas or currency symbols, can be empty)",
+                    @"			6-> Maximum value (numbers only, no commas or currency symbols, can be empty)",
+                    @"-----------------------------------------------------------------------------------------",
+                    @"Example 1:",
+                    @"----------",
+                    @"321321",
+                    @"DOB",
+                    @"FALSE",
+                    @"DATE",
+                    "",
+                    "",
+                    @"18",
+                    @"----------",
+                    @"Above validation will make sure that field in column named ""DOB"" will not be empty",
+                    @"and number of years from today is no less than 18.",
+                    @"-----------------------------------------------------------------------------------------",
+                    @"Example 2:",
+                    @"----------",
+                    @"321321",
+                    @"URSC-Q1",
+                    @"FALSE",
+                    @"FIXED",
+                    @"Yes",
+                    @"No",
+                    @"----------",
+                    @"Above validation will make sure that field in column named ""URSC - Q1"" will not be empty and ",
+                    @"will contain value ""Yes"" or ""No""."
+                    #endregion
+                };
                 File.WriteAllLines(Path.Combine(_settings.ValidationFilesPath, "READ_ME.txt"), readMeStr);
             }
+            catch (Exception ex)
+            {
+                _logger.AddError($"Validator >>> ReadAll: {ex.Message}");
+            }
         }
-
         #endregion
 
         #region HELP METHODS
-        private static Validation ParseValidationFile(IReadOnlyList<string> lines)
+        private Validation ParseValidationFile(IReadOnlyList<string> lines, string validationFile)
         {
-            var queryId = int.Parse(lines[0].Trim());
-            var columnName = lines[1].Trim();
-            var canBeEmpty = lines[2].ToLower().Trim() != "false";
-            var fieldType = (FieldType)Enum.Parse(typeof(FieldType), lines[3].ToUpper().Trim(), true);
-            var parameters = new List<string>();
-            //Additional parameters
-            if (lines.Count >= 5) 
+            try
             {
-                for (var i = 4; i < lines.Count; i++)
+                _logger.AddInfo($"Validator >>> ParseValidationFile: Parsing validation file {validationFile}...");
+                var queryId = int.Parse(lines[0].Trim());
+                var columnName = lines[1].Trim();
+                var canBeEmpty = lines[2].ToLower().Trim() != "false";
+                var fieldType = (FieldType)Enum.Parse(typeof(FieldType), lines[3].ToUpper().Trim(), true);
+                var parameters = new List<string>();
+                //Additional parameters
+                if (lines.Count >= 5)
                 {
-                    parameters.Add(lines[i].Trim());
+                    for (var i = 4; i < lines.Count; i++)
+                    {
+                        parameters.Add(lines[i].Trim());
+                    }
                 }
+
+                return new Validation(queryId, columnName, canBeEmpty, fieldType, parameters);
             }
-            
-            return new Validation(queryId, columnName, canBeEmpty, fieldType, parameters);
+            catch (Exception ex)
+            {
+                _logger.AddError($"Validator >>> ReadAll[{validationFile}]: {ex.Message}");
+            }
+
+            return null;
         }
 
         private bool IsFileValid(IReadOnlyList<string> lines, string validationFile)
         {
             try
             {
+                _logger.AddInfo($"Validator >>> IsFileValid: Checking validation file {validationFile}...");
+
+
                 //Miniumum 4 lines
                 if (lines.Count < 4) return false;
 
@@ -178,7 +196,6 @@ namespace LeadsImporter.Lib.Validation
                 }
 
                 return true;
-
             }
             catch (Exception ex)
             {

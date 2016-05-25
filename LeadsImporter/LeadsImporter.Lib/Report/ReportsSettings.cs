@@ -29,13 +29,14 @@ namespace LeadsImporter.Lib.Report
                 var lines = File.ReadAllLines(_settings.ReportsSettingsFilePath);
                 for (var i = 0; i < lines.Length; i++)
                 {
-                    _logger.AddInfo($"ReportsSettings >>> ReadAll: Reading {i} line...");
+                    _logger.AddInfo($"ReportsSettings >>> ReadAll: Reading line {i}...");
                     var line = lines[i];
                     if (string.IsNullOrWhiteSpace(line)) continue; //skip empty lines
                     if (i == 0) continue; //skip header
                     var reportSettings = MapReportSettings(line, i);
                     _all.Add(reportSettings);
                 }
+                _logger.AddInfo($"ReportsSettings >>> ReadAll: Found {_all.Count} report settings line(s).");
             }
             catch (Exception ex)
             {
@@ -47,16 +48,25 @@ namespace LeadsImporter.Lib.Report
 
         private void CreateIfNotExist()
         {
-            if(File.Exists(_settings.ReportsSettingsFilePath)) return;
-            File.WriteAllLines(_settings.ReportsSettingsFilePath,
-                new []{ "Type,ReportId,ExecutionSequence,LeadIdColumnName,ClientIdColumnName,LenderIdColumnName,DateOfCreditColumnName,DateTimeLeadCreatedColumnName,ProclaimDropPath" });
+            try
+            {
+                if (File.Exists(_settings.ReportsSettingsFilePath)) return;
+                _logger.AddInfo($"ReportsSettings >>> CreateIfNotExist: {_settings.ReportsSettingsFilePath} does't exist - creating new file...");
+                File.WriteAllLines(_settings.ReportsSettingsFilePath,
+                    new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,ClientIdColumnName,LenderIdColumnName,DateOfCreditColumnName,DateTimeLeadCreatedColumnName,ProclaimDropPath" });
+
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportsSettings >>> CreateIfNotExist: {ex.Message}");
+            }
         }
 
         private ReportSettings MapReportSettings(string line, int i)
         {
             try
             {
-                _logger.AddInfo($"ReportsSettings >>> MapReportSettings: Mapping {i} line...");
+                _logger.AddInfo($"ReportsSettings >>> MapReportSettings: Mapping line {i}...");
 
                 var parts = line.Split(',');
 

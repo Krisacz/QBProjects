@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
 using System.Xml;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
@@ -29,11 +25,11 @@ namespace LeadsImporter.Lib.Aquarium
         {
             try
             {
-                //var response = GetReport("38375");//RPPI
-                //var response = GetReport("38379");//URSC
-                var response = GetReport(reportId);//URSC
+                _logger.AddInfo($"WebService >>> GetReportData[{reportId}]: Starting WebService calls...");
+                var response = GetReport(reportId);
                 var headers = GetReportHeaders(response);
                 var dataRows = GetReportDataRows(response);
+                _logger.AddInfo($"WebService >>> GetReportData[{reportId}]: Received {headers.Count} headers and {dataRows.Count} data rows.");
                 return new ReportData() {Headers = headers, Rows = dataRows};
             }
             catch (Exception ex)
@@ -49,10 +45,12 @@ namespace LeadsImporter.Lib.Aquarium
             try
             {
                 //Logon
+                _logger.AddInfo($"WebService >>> GetReport[{queryId}]: Calling Logon method...");
                 var logonResponse = CallLogon();
                 var sessionKey = GetSessionKey(logonResponse);
 
                 //Report
+                _logger.AddInfo($"WebService >>> GetReport[{queryId}]: Calling GetReport method...");
                 var reportResponse = CallRunReport(sessionKey, queryId);
                 return reportResponse;
             }
@@ -296,6 +294,7 @@ namespace LeadsImporter.Lib.Aquarium
         {
             try
             {
+                _logger.AddInfo($"WebService >>> GetReportHeaders: Extracting headers...");
                 var columns = new List<string>();
                 var xmlDocument = new XmlDocument();
                 xmlDocument.LoadXml(response);
@@ -316,6 +315,7 @@ namespace LeadsImporter.Lib.Aquarium
         {
             try
             {
+                _logger.AddInfo($"WebService >>> GetReportHeaders: Extracting data rows...");
                 var dataRows = new List<ReportDataRow>();
                 var xmlDocument = new XmlDocument();
                 xmlDocument.LoadXml(response);
