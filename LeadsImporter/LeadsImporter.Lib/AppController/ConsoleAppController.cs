@@ -20,7 +20,7 @@ namespace LeadsImporter.Lib.AppController
             var reportsSettings = new ReportsSettings(logger, settings).ReadAll();
             var cache = new FileCache(logger, settings);
             var validator = new Validator(logger, settings).ReadAll();
-            var webService = new WebService(logger, settings);          
+            var webService = new AquariumWebService(logger, settings);          
             _executer = new TimerExecuter(logger, settings, reportsSettings, cache, validator, webService);
         }
         

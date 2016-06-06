@@ -9,19 +9,19 @@ using LeadsImporter.Lib.Report;
 
 namespace LeadsImporter.Lib.Aquarium
 {
-    public class WebService
+    public class AquariumWebService
     {
         private readonly ILogger _logger;
         private readonly Settings.Settings _settings;
 
-        public WebService(ILogger logger, Settings.Settings settings)
+        public AquariumWebService(ILogger logger, Settings.Settings settings)
         {
             _logger = logger;
             _settings = settings;
         }
 
         #region FLOW
-        public ReportData GetReportData(string reportId)
+        public ReportData GetReportData(string reportId, ReportSettings reportSettings)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace LeadsImporter.Lib.Aquarium
                 var headers = GetReportHeaders(response);
                 var dataRows = GetReportDataRows(response);
                 _logger.AddInfo($"WebService >>> GetReportData[{reportId}]: Received {headers.Count} headers and {dataRows.Count} data rows.");
-                return new ReportData() {Headers = headers, Rows = dataRows};
+                return new ReportData() {Headers = headers, Rows = dataRows, Settings = reportSettings};
             }
             catch (Exception ex)
             {

@@ -33,7 +33,7 @@ namespace LeadsImporter.Lib.Cache
             }
         }
 
-        public void Store(ReportData data)
+        public void Store(string type, ReportData data)
         {
             try
             {
@@ -46,7 +46,8 @@ namespace LeadsImporter.Lib.Cache
                 {
                     serializer.Serialize(xmlWriter, data);
                     var xml = stringWriter.ToString();
-                    var fullPath = Path.Combine(_settings.TempCachePath, "temp.xml");
+                    var fileName = $"{type}.xml";
+                    var fullPath = Path.Combine(_settings.TempCachePath, fileName);
                     File.WriteAllText(fullPath, xml);
                 }
             }
@@ -56,21 +57,23 @@ namespace LeadsImporter.Lib.Cache
             }
         }
 
-        public ReportData Get(string path)
+        public ReportData Get(string type)
         {
             try
             {
-                _logger.AddInfo($"FileCache >>> Get[{path}]: Getting data...");
+                _logger.AddInfo($"FileCache >>> Get[{type}]: Getting data...");
                 ReportData data = null;
                 var xmlSerializer = new XmlSerializer(typeof(ReportData));
-                var streamReader = new StreamReader(path);
+                var fileName = $"{type}.xml";
+                var fullPath = Path.Combine(_settings.TempCachePath, fileName);
+                var streamReader = new StreamReader(fullPath);
                 data = (ReportData)xmlSerializer.Deserialize(streamReader);
                 streamReader.Close();
                 return data;
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FileCache >>> Get[{path}]: {ex.Message}");
+                _logger.AddError($"FileCache >>> Get[{type}]: {ex.Message}");
             }
 
             return null;

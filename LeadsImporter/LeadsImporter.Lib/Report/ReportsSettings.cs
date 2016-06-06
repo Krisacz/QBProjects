@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using LeadsImporter.Lib.Log;
 using static System.Int32;
 
@@ -46,6 +47,51 @@ namespace LeadsImporter.Lib.Report
             return this;
         }
 
+        public IEnumerable<string> GetTypes()
+        {
+            try
+            {
+                _logger.AddInfo("ReportsSettings >>> GetTypes: Getting all report types...");
+                return _all.GroupBy(p => p.Type).Select(g => g.First().Type).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportsSettings >>> GetTypes: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        public int? GetSequencesPerType(string type)
+        {
+            try
+            {
+                _logger.AddInfo("ReportsSettings >>> GetSequencesPerType: Getting sequences count per type...");
+                return _all.Count(reportSettings => reportSettings.Type == type);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportsSettings >>> GetSequencesPerType: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        public ReportSettings GetReportSettings(string type, int sequence)
+        {
+            try
+            {
+                _logger.AddInfo("ReportsSettings >>> GetReportSettings: Getting report settings for type/sequence...");
+                return _all.First(reportSettings => reportSettings.Type == type && reportSettings.ExecutionSequnece == sequence);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportsSettings >>> GetReportSettings: {ex.Message}");
+            }
+
+            return null;
+        }
+        
         private void CreateIfNotExist()
         {
             try
@@ -53,7 +99,7 @@ namespace LeadsImporter.Lib.Report
                 if (File.Exists(_settings.ReportsSettingsFilePath)) return;
                 _logger.AddInfo($"ReportsSettings >>> CreateIfNotExist: {_settings.ReportsSettingsFilePath} does't exist - creating new file...");
                 File.WriteAllLines(_settings.ReportsSettingsFilePath,
-                    new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,ClientIdColumnName,LenderIdColumnName,DateOfCreditColumnName,DateTimeLeadCreatedColumnName,ProclaimDropPath" });
+                    new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,ProclaimDropPath" });
 
             }
             catch (Exception ex)
@@ -86,10 +132,10 @@ namespace LeadsImporter.Lib.Report
                     AquariumQueryId = aquariumQueryId,
                     ExecutionSequnece = Parse(executionSequnece),
                     LeadIdColumnName = leadIdColumnName,
-                    ClientIdColumnName = clientIdColumnName,
+                    CustomerIdColumnName = clientIdColumnName,
                     LenderIdColumnName = lenderIdColumnName,
-                    DateOfCreditColumnName = dateOfCreditColumnName,
-                    DateTimeLeadCreatedColumnName = dateTimeLeadCreatedColumnName,
+                    LoanDateColumnName = dateOfCreditColumnName,
+                    LeadCreatedColumnName = dateTimeLeadCreatedColumnName,
                     ProclaimDropPath = proclaimDropPath
                 };
             }
@@ -99,11 +145,6 @@ namespace LeadsImporter.Lib.Report
             }
 
             return null;
-        }
-
-        public List<string> GetReportsId()
-        {
-            return _all.Select(x => x.AquariumQueryId).ToList();
         }
     }
 }

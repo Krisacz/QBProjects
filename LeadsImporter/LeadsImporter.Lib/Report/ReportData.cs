@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace LeadsImporter.Lib.Report
 {
@@ -10,7 +6,7 @@ namespace LeadsImporter.Lib.Report
     {
         public List<string> Headers;
         public List<ReportDataRow> Rows;
-
+        public ReportSettings Settings;
     }
 
     public class ReportDataRow

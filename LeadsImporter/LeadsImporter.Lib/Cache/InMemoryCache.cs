@@ -10,7 +10,7 @@ namespace LeadsImporter.Lib.Cache
             throw new NotImplementedException();
         }
 
-        public void Store(ReportData data)
+        public void Store(string type, ReportData data)
         {
             throw new NotImplementedException();
         }

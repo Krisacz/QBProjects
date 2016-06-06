@@ -18,17 +18,17 @@ namespace LeadsImporter.Lib.Executer
         private readonly ReportsSettings _reportsSettings;
         private readonly ICache _cache;
         private readonly Validator _validator;
-        private readonly WebService _webService;
+        private readonly AquariumWebService _aquariumWebService;
         private readonly Timer _timer;
 
-        public TimerExecuter(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings, ICache cache, Validator validator, WebService webService)
+        public TimerExecuter(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings, ICache cache, Validator validator, AquariumWebService aquariumWebService)
         {
             _logger = logger;
             _settings = settings;
             _reportsSettings = reportsSettings;
             _cache = cache;
             _validator = validator;
-            _webService = webService;
+            _aquariumWebService = aquariumWebService;
 
             _timer = new Timer();
             _timer.Elapsed += Execute;
@@ -78,7 +78,7 @@ namespace LeadsImporter.Lib.Executer
                 _logger.AddInfo("TimerExecuter >>> Execute: Doing Stuff...");
                 Thread.Sleep(3 * 1000);
                 _logger.AddInfo("TimerExecuter >>> Execute: Doing Stuff Completed!");
-                //var reportData = _webService.GetReportData(_reportsSettings.GetReportsId()[0]);
+                //var reportData = _aquariumWebService.GetReportData(_reportsSettings.GetReportsId()[0]);
                 //_cache.Store(reportData);
 
                 _logger.AddInfo("TimerExecuter >>> Execute: Finished!");

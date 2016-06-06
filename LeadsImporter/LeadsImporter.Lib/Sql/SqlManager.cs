@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using LeadsImporter.Lib.Log;
@@ -16,6 +17,83 @@ namespace LeadsImporter.Lib.Sql
             _settings = settings;
         }
 
+        #region GET ALL EXCEPTIONS
+        public List<SqlDataExceptionObject> GetAllExceptions()
+        {
+            var list = new List<SqlDataExceptionObject>();
+
+            try
+            {
+                using (var conn = new SqlConnection(_settings.SqlConnectionString))
+                {
+                    conn.Open();
+                    var cmd = new SqlCommand("GetAllExceptions", conn) { CommandType = CommandType.StoredProcedure };
+                    using (var rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(new SqlDataExceptionObject(
+                                (int) rdr["Id"],
+                                (DateTime) rdr["DateTime"],
+                                rdr["Type"].ToString(),
+                                rdr["LeadId"].ToString(),
+                                rdr["CustomerId"].ToString(),
+                                rdr["LenderId"].ToString(),
+                                (DateTime) rdr["LoanDate"],
+                                (DateTime) rdr["LeadCreated"],
+                                rdr["ExceptionType"].ToString(),
+                                rdr["ExceptionDescription"].ToString()));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"SqlManager >>> GetAllExceptions: {ex.Message}");
+            }
+            
+            return list;
+        }
+        #endregion
+
+        #region GET ALL DATA
+        public List<SqlDataObject> GetAllData()
+        {
+            var list = new List<SqlDataObject>();
+
+            try
+            {
+                using (var conn = new SqlConnection(_settings.SqlConnectionString))
+                {
+                    conn.Open();
+                    var cmd = new SqlCommand("GetAllData", conn) { CommandType = CommandType.StoredProcedure };
+                    using (var rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(new SqlDataObject(
+                                (int)rdr["Id"],
+                                (DateTime)rdr["DateTime"],
+                                rdr["Type"].ToString(),
+                                rdr["LeadId"].ToString(),
+                                rdr["CustomerId"].ToString(),
+                                rdr["LenderId"].ToString(),
+                                (DateTime)rdr["LoanDate"],
+                                (DateTime)rdr["LeadCreated"]));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"SqlManager >>> GetAllData: {ex.Message}");
+            }
+
+            return list;
+        }
+        #endregion
+
+        #region DUPLICATES CHECK (NOT NEEDED?)
         public int? DuplicatesCheck(string customerId, string lenderId, DateTime loanDate)
         {
             try
@@ -58,7 +136,9 @@ namespace LeadsImporter.Lib.Sql
 
             return null;
         }
+        #endregion
 
+        #region INSERT RECORD
         public void InsertRecord(string type, string leadId, string customerId, string lenderId, DateTime loanDate, DateTime leadCreated)
         {
             try
@@ -99,7 +179,9 @@ namespace LeadsImporter.Lib.Sql
                 _logger.AddError($"SqlManager >>> InsertRecord: {ex.Message}");
             }
         }
+        #endregion
 
+        #region INSERT EXCEPTION
         public void InsertException(string type, string leadId, string customerId, string lenderId, DateTime loanDate, DateTime leadCreated, string exceptionType, string exceptionDescription)
         {
             try
@@ -144,5 +226,6 @@ namespace LeadsImporter.Lib.Sql
                 _logger.AddError($"SqlManager >>> InsertException: {ex.Message}");
             }
         }
+        #endregion
     }
 }

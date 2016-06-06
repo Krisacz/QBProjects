@@ -9,7 +9,7 @@ namespace LeadsImporter.Lib.Cache
     public interface ICache
     {
         void Clear();
-        void Store(ReportData data);
-        ReportData Get(string xmlPath);
+        void Store(string type, ReportData data);
+        ReportData Get(string type);
     }
 }
