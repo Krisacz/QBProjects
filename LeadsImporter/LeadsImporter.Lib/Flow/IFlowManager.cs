@@ -9,8 +9,9 @@ namespace LeadsImporter.Lib.Flow
     public interface IFlowManager
     {
         void Init();
-        void GetReportsData();
+        void ProcessReports();
         void SqlCheck();
+        void Validate();
         void Output();
         void End();
     }

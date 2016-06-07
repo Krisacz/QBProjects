@@ -12,5 +12,10 @@ namespace LeadsImporter.Lib.Sql
                 
             }
         }
+
+        public List<ReportDataRow> GetNewDuplicates(ReportData reportData, List<SqlDataObject> allData)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

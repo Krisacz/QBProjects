@@ -3,17 +3,16 @@ using LeadsImporter.Lib.Log;
 
 namespace LeadsImporter.Lib.Report
 {
-    //TODO change to non-static class !!!!!!!!!!!!!!!!!!!!!!
-    public static class ReportDataManager
+    public class ReportDataManager
     {
-        private static ILogger _logger;
+        private readonly ILogger _logger;
 
-        public static void Init(ILogger logger)
+        public ReportDataManager(ILogger logger)
         {
             _logger = logger;
         }
 
-        private static int? GetExistingReportDataRowIndex(ReportData existing, ReportData join, int joinRowIndex)
+        private int? GetExistingReportDataRowIndex(ReportData existing, ReportData join, int joinRowIndex)
         {
             try
             {
@@ -56,7 +55,7 @@ namespace LeadsImporter.Lib.Report
             return null;
         }
 
-        private static int GetColumnIndex(ReportData reportData, string headerName)
+        private int GetColumnIndex(ReportData reportData, string headerName)
         {
             try
             {
@@ -82,7 +81,7 @@ namespace LeadsImporter.Lib.Report
                    || reportSettings.LeadCreatedColumnName == header;
         }
 
-        public static void Join(ReportData reportData, ReportData joinReportData)
+        public void Join(ReportData reportData, ReportData joinReportData)
         {
             try
             {

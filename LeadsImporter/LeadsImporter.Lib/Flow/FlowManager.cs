@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using LeadsImporter.Lib.Aquarium;
 using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Report;
 using LeadsImporter.Lib.Sql;
+using LeadsImporter.Lib.Validation;
 
 namespace LeadsImporter.Lib.Flow
 {
@@ -12,14 +16,21 @@ namespace LeadsImporter.Lib.Flow
         private readonly ReportsSettings _reportsSettings;
         private readonly AquariumWebService _webService;
         private readonly SqlManager _sqlManager;
-        private SqlDataChecker _slqDataChecker;
+        private readonly ReportDataManager _reportDataManager;
+        private readonly SqlDataChecker _slqDataChecker;
+        private readonly SqlDataUpdater _sqlDataUpdater;
+        private readonly Validator _validator;
 
-        public FlowManager(ICache cache, ReportsSettings reportsSettings, AquariumWebService webService, SqlManager sqlManager)
+        public FlowManager(ICache cache, ReportsSettings reportsSettings, AquariumWebService webService, SqlManager sqlManager, ReportDataManager reportDataManager, SqlDataChecker slqDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator)
         {
             _cache = cache;
             _reportsSettings = reportsSettings;
             _webService = webService;
             _sqlManager = sqlManager;
+            _slqDataChecker = slqDataChecker;
+            _reportDataManager = reportDataManager;
+            _sqlDataUpdater = sqlDataUpdater;
+            _validator = validator;
         }
 
         public void Init()
@@ -27,31 +38,36 @@ namespace LeadsImporter.Lib.Flow
             _cache.Clear();
         }
 
-        public void GetReportsData()
+        public void ProcessReports()
         {
             var types = _reportsSettings.GetTypes();
 
             foreach (var type in types)
             {
-                var sequences = _reportsSettings.GetSequencesPerType(type);
-                ReportData firstReportData = null;
-                for (var s = 1; s <= sequences; s++)
-                {
-                    var reportSettings = _reportsSettings.GetReportSettings(type, s);
-                    //First in the sequence
-                    if (s == 1)
-                    {
-                        firstReportData = _webService.GetReportData(reportSettings.AquariumQueryId, reportSettings);
-                    }
-                    //any sequential
-                    else
-                    {
-                        var reportData = _webService.GetReportData(reportSettings.AquariumQueryId, reportSettings);
-                        ReportDataManager.Join(firstReportData, reportData);
-                    }
-                }
-                _cache.Store(type, firstReportData);
+                ProcessReport(type);
             }
+        }
+
+        private void ProcessReport(string type)
+        {
+            var sequences = _reportsSettings.GetSequencesPerType(type);
+            ReportData firstReportData = null;
+            for (var s = 1; s <= sequences; s++)
+            {
+                var reportSettings = _reportsSettings.GetReportSettings(type, s);
+                //First in the sequence
+                if (s == 1)
+                {
+                    firstReportData = _webService.GetReportData(reportSettings.AquariumQueryId, reportSettings);
+                }
+                //any sequential
+                else
+                {
+                    var reportData = _webService.GetReportData(reportSettings.AquariumQueryId, reportSettings);
+                    _reportDataManager.Join(firstReportData, reportData);
+                }
+            }
+            _cache.Store(type, firstReportData);
         }
 
         public void SqlCheck()
@@ -59,20 +75,59 @@ namespace LeadsImporter.Lib.Flow
             var exceptions = _sqlManager.GetAllExceptions();
             var allData = _sqlManager.GetAllData();
             var types = _reportsSettings.GetTypes();
+            foreach (var type in types) CheckData(type, exceptions, allData);
+        }
 
+        private void CheckData(string type, List<SqlDataExceptionObject> exceptions, List<SqlDataObject> allData)
+        {
+            var reportData = _cache.Get(type);
+            _slqDataChecker.RemoveExceptions(reportData, exceptions);
+            var duplictes = _slqDataChecker.GetNewDuplicates(reportData, allData);
+            _sqlDataUpdater.SubmitNewDuplicates(duplictes);
+            _sqlDataUpdater.SubmitNewData(reportData);
+            _cache.Store(type, reportData);
+        }
+
+        public void Validate()
+        {
+            var types = _reportsSettings.GetTypes();
             foreach (var type in types)
             {
-                var reportData = _cache.Get(type);
-                _slqDataChecker.RemoveExceptions(reportData, exceptions);
-                var duplictes = _slqDataChecker.GetNewDuplicates(reportData, allData);
-                _sqlDataUpdater.SubmitNewDuplicates(duplictes);
-                _sqlDataUpdater.SubmitNewData(reportData);
+                CleanReport(type);
             }
+        }
+
+        private void CleanReport(string type)
+        {
+            _validator.
+            var reportData = _cache.Get(type);
         }
 
         public void Output()
         {
-            throw new NotImplementedException();
+            var types = _reportsSettings.GetTypes();
+            foreach (var type in types)
+            {
+                SaveReport(type);
+            }
+        }
+
+        private void SaveReport(string type)
+        {
+            var reportData = _cache.Get(type);
+            var csv = new List<string>();
+            foreach (var reportDataRow in reportData.Rows)
+            {
+                var line = string.Join(",", reportDataRow.Data);
+                csv.Add(line);
+            }
+            csv.Add(string.Empty);
+
+            var fileName = $"import_{DateTime.Now.ToString("ddMMyyyy_HHmmss")}.csv";
+            var pathRoot = reportData.Settings.ProclaimDropPath;
+            var fullPath = Path.Combine(pathRoot, fileName);
+
+            File.WriteAllLines(fullPath, csv);
         }
 
         public void End()

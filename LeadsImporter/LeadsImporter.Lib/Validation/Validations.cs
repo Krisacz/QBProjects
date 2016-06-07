@@ -20,5 +20,10 @@ namespace LeadsImporter.Lib.Validation
         {
             return _validations.Count;
         }
+
+        public List<Validation> GetAll()
+        {
+            return _validations;
+        }
     }
 }

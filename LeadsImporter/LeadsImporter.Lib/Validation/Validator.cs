@@ -122,6 +122,13 @@ namespace LeadsImporter.Lib.Validation
         }
         #endregion
 
+        #region GET ALL
+        public List<Validation> GetAll()
+        {
+            return _validations.GetAll();
+        }
+        #endregion
+
         #region HELP METHODS
         private Validation ParseValidationFile(IReadOnlyList<string> lines, string validationFile)
         {
