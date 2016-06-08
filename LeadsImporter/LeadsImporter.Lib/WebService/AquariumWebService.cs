@@ -6,20 +6,19 @@ using System.Security;
 using System.Xml;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
+using LeadsImporter.Lib.Setting;
 
-namespace LeadsImporter.Lib.Aquarium
+namespace LeadsImporter.Lib.WebService
 {
-    public class AquariumWebService
+    public class AquariumWebService : IDataAccessor
     {
         private readonly ILogger _logger;
-        private readonly Settings.Settings _settings;
-        private readonly ReportsSettings _reportsSettings;
+        private readonly Settings _settings;
 
-        public AquariumWebService(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings)
+        public AquariumWebService(ILogger logger, Settings settings)
         {
             _logger = logger;
             _settings = settings;
-            _reportsSettings = reportsSettings;
         }
 
         #region FLOW

@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using LeadsImporter.Lib.Log;
+using LeadsImporter.Lib.Setting;
 
 namespace LeadsImporter.Lib.Sql
 {
     public class SqlManager
     {
         private readonly ILogger _logger;
-        private readonly Settings.Settings _settings;
+        private readonly Settings _settings;
 
-        public SqlManager(ILogger logger, Settings.Settings settings)
+        public SqlManager(ILogger logger, Settings settings)
         {
             _logger = logger;
             _settings = settings;
@@ -139,7 +140,7 @@ namespace LeadsImporter.Lib.Sql
         #endregion
 
         #region INSERT RECORD
-        public void InsertRecord(string type, string leadId, string customerId, string lenderId, DateTime loanDate, DateTime leadCreated)
+        public void InsertRecord(SqlDataObject data)
         {
             try
             {
@@ -159,12 +160,12 @@ namespace LeadsImporter.Lib.Sql
                         cmd.Parameters.Add("@LeadCreated", SqlDbType.Date);
 
                         //Set parameters
-                        cmd.Parameters["@Type"].Value = type;
-                        cmd.Parameters["@LeadId"].Value = leadId;
-                        cmd.Parameters["@CustomerId"].Value = customerId;
-                        cmd.Parameters["@LenderId"].Value = lenderId;
-                        cmd.Parameters["@LoanDate"].Value = loanDate;
-                        cmd.Parameters["@LeadCreated"].Value = leadCreated;
+                        cmd.Parameters["@Type"].Value = data.Type;
+                        cmd.Parameters["@LeadId"].Value = data.LeadId;
+                        cmd.Parameters["@CustomerId"].Value = data.CustomerId;
+                        cmd.Parameters["@LenderId"].Value = data.LenderId;
+                        cmd.Parameters["@LoanDate"].Value = data.LoanDate;
+                        cmd.Parameters["@LeadCreated"].Value = data.LoanDate;
 
                         //Open connection and execute stored procedure
                         conn.Open();
@@ -182,7 +183,7 @@ namespace LeadsImporter.Lib.Sql
         #endregion
 
         #region INSERT EXCEPTION
-        public void InsertException(string type, string leadId, string customerId, string lenderId, DateTime loanDate, DateTime leadCreated, string exceptionType, string exceptionDescription)
+        public void InsertException(SqlDataExceptionObject exception)
         {
             try
             {
@@ -204,14 +205,14 @@ namespace LeadsImporter.Lib.Sql
                         cmd.Parameters.Add("@ExceptionDescription", SqlDbType.VarChar);
 
                         //Set parameters
-                        cmd.Parameters["@Type"].Value = type;
-                        cmd.Parameters["@LeadId"].Value = leadId;
-                        cmd.Parameters["@CustomerId"].Value = customerId;
-                        cmd.Parameters["@LenderId"].Value = lenderId;
-                        cmd.Parameters["@LoanDate"].Value = loanDate;
-                        cmd.Parameters["@LeadCreated"].Value = leadCreated;
-                        cmd.Parameters["@ExceptionType"].Value = exceptionType;
-                        cmd.Parameters["@ExceptionDescription"].Value = exceptionDescription;
+                        cmd.Parameters["@Type"].Value = exception.Type;
+                        cmd.Parameters["@LeadId"].Value = exception.LeadId;
+                        cmd.Parameters["@CustomerId"].Value = exception.CustomerId;
+                        cmd.Parameters["@LenderId"].Value = exception.LenderId;
+                        cmd.Parameters["@LoanDate"].Value = exception.LoanDate;
+                        cmd.Parameters["@LeadCreated"].Value = exception.LeadCreated;
+                        cmd.Parameters["@ExceptionType"].Value = exception.ExceptionType;
+                        cmd.Parameters["@ExceptionDescription"].Value = exception.ExceptionDescription;
 
                         //Open connection and execute stored procedure
                         conn.Open();

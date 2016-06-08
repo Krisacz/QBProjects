@@ -3,7 +3,7 @@ using LeadsImporter.Lib.Report;
 
 namespace LeadsImporter.Lib.Cache
 {
-    //TODO InMemoryCache implementationNo,No
+    //TODO InMemoryCache implementation
     public class InMemoryCache : ICache
     {
         public void Clear()

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
+using LeadsImporter.Lib.Setting;
 using LeadsImporter.Lib.Sql;
 
 namespace LeadsImporter.Lib.Validation
@@ -12,13 +13,13 @@ namespace LeadsImporter.Lib.Validation
     public class Validator
     {
         private readonly ILogger _logger;
-        private readonly Settings.Settings _settings;
+        private readonly Settings _settings;
         private Validations _validations;
         private readonly ReportsSettings _reportsSettings;
         private readonly ReportDataManager _reportDataManager;
         private readonly SqlDataUpdater _sqlDataUpdater;
 
-        public Validator(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater)
+        public Validator(ILogger logger, Settings settings, ReportsSettings reportsSettings, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater)
         {
             _logger = logger;
             _settings = settings;
@@ -28,11 +29,11 @@ namespace LeadsImporter.Lib.Validation
         }
 
         #region READ ALL VALIDATION FILES
-        public Validator ReadAll()
+        public Validator Read()
         {
             try
             {
-                _logger.AddInfo("Validator >>> ReadAll: Reading all validation files...");
+                _logger.AddInfo("Validator >>> Read: Reading all validation files...");
                 CreateIfNotExist();
                 var allFiles = Directory.GetFiles(_settings.ValidationFilesPath);
                 var validationFiles = allFiles.Where(x => x.EndsWith("val"));
@@ -134,59 +135,84 @@ namespace LeadsImporter.Lib.Validation
         #region VALIDATE REPORT
         public ReportData ValidateReport(ReportData reportData)
         {
-            RemoveIllegalCharacters(reportData);
-            var validations = _validations.GetAll();
-            var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
-            var exceptions = new List<SqlDataExceptionObject>();
-            foreach (var reportDataRow in reportData.Rows) ValidateRow(reportData, reportDataRow, validations, exceptions, correctedReportData);
-            _sqlDataUpdater.SubmitNewExceptions(exceptions);
-            return correctedReportData;
+            try
+            {
+                RemoveIllegalCharacters(reportData);
+                var validations = _validations.GetAll();
+                var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
+                var exceptions = new List<SqlDataExceptionObject>();
+                foreach (var reportDataRow in reportData.Rows) ValidateRow(reportData, reportDataRow, validations, exceptions, correctedReportData);
+                _sqlDataUpdater.SubmitNewExceptions(exceptions);
+                return correctedReportData;
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"Validator >>> ValidateReport: {ex.Message}");
+            }
+
+            return null;
         }
 
         private void ValidateRow(ReportData reportData, ReportDataRow reportDataRow, IEnumerable<Validation> validations, 
             ICollection<SqlDataExceptionObject> exceptions, ReportData correctedReportData)
         {
-            var anyException = false;
-            foreach (var validation in validations)
+            try
             {
-                if (validation.QueryId != reportData.QueryId) continue;
-                for (var index = 0; index < reportData.Headers.Count; index++)
+                var anyException = false;
+                foreach (var validation in validations)
                 {
-                    var header = reportData.Headers[index];
-                    if (header != validation.ColumnName) continue;
-                    var exception = Validate(reportDataRow.Data[index], validation);
-                    if (exception == null) continue;
-                    var type = _reportsSettings.GetTypeFromQueryId(reportData.QueryId);
-                    var leadId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
-                    var customerId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
-                    var lenderId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
-                    var loanDate = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
-                    var leadCreated = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
-                    var exceptionDesc = $"[{header}] " + exception;
-                    exceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", exceptionDesc));
-                    anyException = true;
+                    if (validation.QueryId != reportData.QueryId) continue;
+                    for (var index = 0; index < reportData.Headers.Count; index++)
+                    {
+                        var header = reportData.Headers[index];
+                        if (header != validation.ColumnName) continue;
+                        var exception = Validate(reportDataRow.Data[index], validation);
+                        if (exception == null) continue;
+                        var type = _reportsSettings.GetTypeFromQueryId(reportData.QueryId);
+                        var leadId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                            _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
+                        var customerId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                            _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
+                        var lenderId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                            _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
+                        var loanDate = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                            _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
+                        var leadCreated = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                            _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
+                        var exceptionDesc = $"[{header}] " + exception;
+                        exceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", exceptionDesc));
+                        anyException = true;
+                    }
                 }
-            }
 
-            if(!anyException) correctedReportData.Rows.Add(reportDataRow);
+                if (!anyException) correctedReportData.Rows.Add(reportDataRow);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"Validator >>> ValidateRow: {ex.Message}");
+            }
         }
 
-        private static string Validate(string value, Validation validation)
+        private string Validate(string value, Validation validation)
         {
-            switch (validation.FieldType)
+            try
             {
-                case FieldType.STRING:  return ValidateString(value, validation.CanBeEmpty, validation.Parameters);
-                case FieldType.FIXED:   return ValidateFixed(value, validation.CanBeEmpty, validation.Parameters);
-                case FieldType.DATE:    return ValidateDate(value, validation.CanBeEmpty, validation.Parameters);
-                case FieldType.VALUE:   return ValidateValue(value, validation.CanBeEmpty, validation.Parameters);
+                switch (validation.FieldType)
+                {
+                    case FieldType.STRING:  return ValidateString(value, validation.CanBeEmpty, validation.Parameters);
+                    case FieldType.FIXED:   return ValidateFixed(value, validation.CanBeEmpty, validation.Parameters);
+                    case FieldType.DATE:    return ValidateDate(value, validation.CanBeEmpty, validation.Parameters);
+                    case FieldType.VALUE:   return ValidateValue(value, validation.CanBeEmpty, validation.Parameters);
 
-                default: throw new ArgumentOutOfRangeException();
+                    default: throw new ArgumentOutOfRangeException();
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.AddError($"Validator >>> Validate: {ex.Message}");
+            }
+
+            return null;
         }
 
         private static string ValidateString(string value, bool canBeEmpty, IReadOnlyList<string> parameters)
@@ -290,16 +316,23 @@ namespace LeadsImporter.Lib.Validation
             return null;
         }
 
-        private static void RemoveIllegalCharacters(ReportData reportData)
+        private void RemoveIllegalCharacters(ReportData reportData)
         {
-            var illegalCharacters = new Regex(@",£");
-            foreach (var reportDataRow in reportData.Rows)
+            try
             {
-                for (var index = 0; index < reportDataRow.Data.Count; index++)
+                var illegalCharacters = new Regex(@",£");
+                foreach (var reportDataRow in reportData.Rows)
                 {
-                    var str = reportDataRow.Data[index];
-                    reportDataRow.Data[index] = illegalCharacters.Replace(str, "");
+                    for (var index = 0; index < reportDataRow.Data.Count; index++)
+                    {
+                        var str = reportDataRow.Data[index];
+                        reportDataRow.Data[index] = illegalCharacters.Replace(str, "");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"Validator >>> ReadAll: {ex.Message}");
             }
         }
         #endregion

@@ -108,15 +108,31 @@ namespace LeadsImporter.Lib.Report
             }
         }
 
-        private static void AddHeaderIfNotExist(ReportData reportData, string newHeader)
+        private void AddHeaderIfNotExist(ReportData reportData, string newHeader)
         {
-            if(!reportData.Headers.Contains(newHeader)) reportData.Headers.Add(newHeader);
+            try
+            {
+                if (!reportData.Headers.Contains(newHeader)) reportData.Headers.Add(newHeader);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> AddHeaderIfNotExist: {ex.Message}");
+            }
         }
 
         public string GetValueForColumn(ReportData reportData, ReportDataRow row, string columnName)
         {
-            var columnIndex = GetColumnIndex(reportData, columnName);
-            return row.Data[columnIndex];
+            try
+            {
+                var columnIndex = GetColumnIndex(reportData, columnName);
+                return row.Data[columnIndex];
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> GetValueForColumn: {ex.Message}");
+            }
+
+            return null;
         }
     }
 }

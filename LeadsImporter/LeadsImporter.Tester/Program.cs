@@ -6,11 +6,10 @@ using System.Net;
 using System.Xml;
 using System.Xml.Serialization;
 using LeadsImporter.Lib.AppController;
-using LeadsImporter.Lib.Aquarium;
 using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
-using LeadsImporter.Lib.Settings;
+using LeadsImporter.Lib.Setting;
 using LeadsImporter.Lib.Sql;
 using Topshelf;
 

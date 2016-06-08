@@ -4,15 +4,16 @@ using System.Xml;
 using System.Xml.Serialization;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
+using LeadsImporter.Lib.Setting;
 
 namespace LeadsImporter.Lib.Cache
 {
     public class FileCache : ICache
     {
         private readonly ILogger _logger;
-        private readonly Settings.Settings _settings;
+        private readonly Settings _settings;
 
-        public FileCache(ILogger logger, Settings.Settings settings)
+        public FileCache(ILogger logger, Settings settings)
         {
             _logger = logger;
             _settings = settings;

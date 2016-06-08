@@ -7,9 +7,19 @@ namespace LeadsImporter.Lib.Sql
     //TODO Implementation
     public class SqlDataUpdater
     {
-        public void SubmitNewData(ReportData reportData)
+        private readonly SqlManager _sqlManager;
+
+        public SqlDataUpdater(SqlManager sqlManager)
         {
-            throw new System.NotImplementedException();
+            _sqlManager = sqlManager;
+        }
+
+        public void SubmitNewData(List<SqlDataObject> newData)
+        {
+            foreach (var sqlDataObject in newData)
+            {
+                _sqlManager.InsertRecord(sqlDataObject);
+            }
         }
 
         public void SubmitNewExceptions(List<SqlDataExceptionObject> exceptions)

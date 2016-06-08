@@ -11,7 +11,6 @@ namespace LeadsImporter.Lib.Flow
         void Init();
         void ProcessReports();
         void SqlCheck();
-        void Validate();
         void Output();
         void End();
     }

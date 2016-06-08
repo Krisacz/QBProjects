@@ -28,5 +28,16 @@ namespace LeadsImporter.Lib.Sql
             LoanDate = loanDate;
             LeadCreated = leadCreated;
         }
+
+        //For submission
+        public SqlDataObject(string type, string leadId, string customerId, string lenderId, DateTime loanDate, DateTime leadCreated)
+        {
+            Type = type;
+            LeadId = leadId;
+            CustomerId = customerId;
+            LenderId = lenderId;
+            LoanDate = loanDate;
+            LeadCreated = leadCreated;
+        }
     }
 }

@@ -2,7 +2,7 @@
 using System.Configuration;
 using LeadsImporter.Lib.Log;
 
-namespace LeadsImporter.Lib.Settings
+namespace LeadsImporter.Lib.Setting
 {
     public class SettingsReader
     {
@@ -20,10 +20,7 @@ namespace LeadsImporter.Lib.Settings
 
                 var toBeCheckedPath = ConfigurationManager.AppSettings["PoolingTimeInSec"];
                 logger.AddInfo($"SettingsReader >>> Read: PoolingTimeInSec: {toBeCheckedPath}");
-
-                var errorFolderPath = ConfigurationManager.AppSettings["LogFilePath"];
-                logger.AddInfo($"SettingsReader >>> Read: LogFilePath: {errorFolderPath}");
-
+                
                 var proclaimProcessFolderPath = ConfigurationManager.AppSettings["ReportsSettingsFilePath"];
                 logger.AddInfo($"SettingsReader >>> Read: ReportsSettingsFilePath: {proclaimProcessFolderPath}");
 
@@ -37,7 +34,7 @@ namespace LeadsImporter.Lib.Settings
                 logger.AddInfo($"SettingsReader >>> Read: ValidationFilesPath: {validationFilesPath}");
 
                 logger.AddInfo("SettingsReader >>> Read: Config file valid.");
-                return new Settings(incomingFolderPath, processedFolderPath, toBeCheckedPath, errorFolderPath, proclaimProcessFolderPath, aquariumUsername, aquariumPassword, validationFilesPath);
+                return new Settings(incomingFolderPath, processedFolderPath, toBeCheckedPath, proclaimProcessFolderPath, aquariumUsername, aquariumPassword, validationFilesPath);
             }
             catch (Exception ex)
             {

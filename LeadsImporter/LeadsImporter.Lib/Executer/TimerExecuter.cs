@@ -1,11 +1,8 @@
 using System;
-using System.Threading;
 using System.Timers;
-using LeadsImporter.Lib.Aquarium;
-using LeadsImporter.Lib.Cache;
+using LeadsImporter.Lib.Flow;
 using LeadsImporter.Lib.Log;
-using LeadsImporter.Lib.Report;
-using LeadsImporter.Lib.Validation;
+using LeadsImporter.Lib.Setting;
 using static System.Double;
 using Timer = System.Timers.Timer;
 
@@ -14,21 +11,13 @@ namespace LeadsImporter.Lib.Executer
     public class TimerExecuter : IExecuter
     {
         private readonly ILogger _logger;
-        private readonly Settings.Settings _settings;
-        private readonly ReportsSettings _reportsSettings;
-        private readonly ICache _cache;
-        private readonly Validator _validator;
-        private readonly AquariumWebService _aquariumWebService;
         private readonly Timer _timer;
+        private readonly IFlowManager _flowManager;
 
-        public TimerExecuter(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings, ICache cache, Validator validator, AquariumWebService aquariumWebService)
+        public TimerExecuter(ILogger logger, Settings settings, IFlowManager flowManager)
         {
             _logger = logger;
-            _settings = settings;
-            _reportsSettings = reportsSettings;
-            _cache = cache;
-            _validator = validator;
-            _aquariumWebService = aquariumWebService;
+            _flowManager = flowManager;
 
             _timer = new Timer();
             _timer.Elapsed += Execute;
@@ -74,12 +63,11 @@ namespace LeadsImporter.Lib.Executer
                 _logger.AddInfo("TimerExecuter >>> Execute: (Waking up)");
                 _logger.AddInfo("TimerExecuter >>> Execute: Executing...");
 
-                //Debug
-                _logger.AddInfo("TimerExecuter >>> Execute: Doing Stuff...");
-                Thread.Sleep(3 * 1000);
-                _logger.AddInfo("TimerExecuter >>> Execute: Doing Stuff Completed!");
-                //var reportData = _aquariumWebService.GetReportData(_reportsSettings.GetReportsId()[0]);
-                //_cache.Store(reportData);
+                _flowManager.Init();
+                _flowManager.ProcessReports();
+                _flowManager.SqlCheck();
+                _flowManager.Output();
+                _flowManager.End();
 
                 _logger.AddInfo("TimerExecuter >>> Execute: Finished!");
                 _logger.AddInfo("TimerExecuter >>> Execute: (Sleeping)");

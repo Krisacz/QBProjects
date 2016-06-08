@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using LeadsImporter.Lib.Log;
+using LeadsImporter.Lib.Setting;
 using static System.Int32;
 
 namespace LeadsImporter.Lib.Report
@@ -11,10 +11,10 @@ namespace LeadsImporter.Lib.Report
     public class ReportsSettings
     {
         private readonly ILogger _logger;
-        private readonly Settings.Settings _settings;
+        private readonly Settings _settings;
         private readonly List<ReportSettings> _all;
 
-        public ReportsSettings(ILogger logger, Settings.Settings settings)
+        public ReportsSettings(ILogger logger, Settings settings)
         {
             _all = new List<ReportSettings>();
             _logger = logger;
@@ -25,7 +25,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                _logger.AddInfo("ReportsSettings >>> ReadAll: Reading reports settings file...");
+                _logger.AddInfo("ReportsSettings >>> Read: Reading reports settings file...");
                 CreateIfNotExist();
                 var lines = File.ReadAllLines(_settings.ReportsSettingsFilePath);
                 for (var i = 0; i < lines.Length; i++)
@@ -115,7 +115,6 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddInfo($"ReportsSettings >>> CreateIfNotExist: {_settings.ReportsSettingsFilePath} does't exist - creating new file...");
                 File.WriteAllLines(_settings.ReportsSettingsFilePath,
                     new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,ProclaimDropPath" });
-
             }
             catch (Exception ex)
             {
@@ -164,7 +163,16 @@ namespace LeadsImporter.Lib.Report
 
         public string GetTypeFromQueryId(int reportId)
         {
-            return _all.First(x => x.AquariumQueryId == reportId).Type;
+            try
+            {
+                return _all.First(x => x.AquariumQueryId == reportId).Type;
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportsSettings >>> GetTypeFromQueryId: {ex.Message}");
+            }
+
+            return null;
         }
     }
 }
