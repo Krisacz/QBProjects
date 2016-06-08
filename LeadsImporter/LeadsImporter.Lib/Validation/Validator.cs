@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using LeadsImporter.Lib.Log;
+using LeadsImporter.Lib.Report;
+using LeadsImporter.Lib.Sql;
 
 namespace LeadsImporter.Lib.Validation
 {
@@ -11,11 +14,17 @@ namespace LeadsImporter.Lib.Validation
         private readonly ILogger _logger;
         private readonly Settings.Settings _settings;
         private Validations _validations;
+        private readonly ReportsSettings _reportsSettings;
+        private readonly ReportDataManager _reportDataManager;
+        private readonly SqlDataUpdater _sqlDataUpdater;
 
-        public Validator(ILogger logger, Settings.Settings settings)
+        public Validator(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater)
         {
             _logger = logger;
             _settings = settings;
+            _reportsSettings = reportsSettings;
+            _reportDataManager = reportDataManager;
+            _sqlDataUpdater = sqlDataUpdater;
         }
 
         #region READ ALL VALIDATION FILES
@@ -121,15 +130,182 @@ namespace LeadsImporter.Lib.Validation
             }
         }
         #endregion
-
-        #region GET ALL
-        public List<Validation> GetAll()
+        
+        #region VALIDATE REPORT
+        public ReportData ValidateReport(ReportData reportData)
         {
-            return _validations.GetAll();
+            RemoveIllegalCharacters(reportData);
+            var validations = _validations.GetAll();
+            var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
+            var exceptions = new List<SqlDataExceptionObject>();
+            foreach (var reportDataRow in reportData.Rows) ValidateRow(reportData, reportDataRow, validations, exceptions, correctedReportData);
+            _sqlDataUpdater.SubmitNewExceptions(exceptions);
+            return correctedReportData;
+        }
+
+        private void ValidateRow(ReportData reportData, ReportDataRow reportDataRow, IEnumerable<Validation> validations, 
+            ICollection<SqlDataExceptionObject> exceptions, ReportData correctedReportData)
+        {
+            var anyException = false;
+            foreach (var validation in validations)
+            {
+                if (validation.QueryId != reportData.QueryId) continue;
+                for (var index = 0; index < reportData.Headers.Count; index++)
+                {
+                    var header = reportData.Headers[index];
+                    if (header != validation.ColumnName) continue;
+                    var exception = Validate(reportDataRow.Data[index], validation);
+                    if (exception == null) continue;
+                    var type = _reportsSettings.GetTypeFromQueryId(reportData.QueryId);
+                    var leadId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                        _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
+                    var customerId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                        _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
+                    var lenderId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                        _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
+                    var loanDate = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                        _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
+                    var leadCreated = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
+                        _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
+                    var exceptionDesc = $"[{header}] " + exception;
+                    exceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", exceptionDesc));
+                    anyException = true;
+                }
+            }
+
+            if(!anyException) correctedReportData.Rows.Add(reportDataRow);
+        }
+
+        private static string Validate(string value, Validation validation)
+        {
+            switch (validation.FieldType)
+            {
+                case FieldType.STRING:  return ValidateString(value, validation.CanBeEmpty, validation.Parameters);
+                case FieldType.FIXED:   return ValidateFixed(value, validation.CanBeEmpty, validation.Parameters);
+                case FieldType.DATE:    return ValidateDate(value, validation.CanBeEmpty, validation.Parameters);
+                case FieldType.VALUE:   return ValidateValue(value, validation.CanBeEmpty, validation.Parameters);
+
+                default: throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static string ValidateString(string value, bool canBeEmpty, IReadOnlyList<string> parameters)
+        {
+            //Check if string can be empty
+            if (string.IsNullOrWhiteSpace(value) && !canBeEmpty) return "STRING can not be empty.";
+
+            //Check if we have minimum len
+            if (parameters.Count > 0)
+            {
+                var minimumLen = int.Parse(parameters[0]);
+                if (string.IsNullOrEmpty(value) &&  minimumLen > 0) return $"STRING must be at least {minimumLen} length.";
+                if (!string.IsNullOrEmpty(value) && value.Length < minimumLen) return $"STRING must be at least {minimumLen} length.";
+            }
+
+            //Check if we have maximum len
+            if (parameters.Count > 1)
+            {
+                var maximumLen = int.Parse(parameters[1]);
+                if (!string.IsNullOrEmpty(value) && value.Length > maximumLen) return $"STRING must be at not longer than {maximumLen}.";
+            }
+
+            return null;
+        }
+
+        private static string ValidateFixed(string value, bool canBeEmpty, IReadOnlyList<string> parameters)
+        {
+            //Check if string can be empty
+            if (string.IsNullOrWhiteSpace(value) && !canBeEmpty) return "FIXED can not be empty.";
+
+            //Check if content is one of the fixed values
+            var correct = false;
+            foreach (var parameter in parameters)
+            {
+                if (string.Equals(parameter, value, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    correct = true;
+                }
+            }
+            return !correct ? $"FIXED must be one of the provided values: {string.Join(",", parameters)}" : null;
+        }
+
+        private static string ValidateDate(string value, bool canBeEmpty, IReadOnlyList<string> parameters)
+        {
+            //Check if string can be empty
+            if (string.IsNullOrWhiteSpace(value) && !canBeEmpty) return "DATE can not be empty.";
+
+            //Try to parse date
+            DateTime date;
+            if(!DateTime.TryParse(value, out date)) return "DATE could not be parsed.";
+
+            //Check if we have minimum date
+            if (parameters.Count > 0)
+            {
+                var minimumDate = DateTime.Parse(parameters[0]);
+                if (date < minimumDate) return $"DATE can not be earlier than {minimumDate}.";
+            }
+
+            //Check if we have minimum date
+            if (parameters.Count > 1)
+            {
+                var maximumDate = DateTime.Parse(parameters[1]);
+                if (date > maximumDate) return $"DATE can not be later than {maximumDate}.";
+            }
+
+            //Check if date is at least X years from today
+            if (parameters.Count > 2)
+            {
+                var years = int.Parse(parameters[2]);
+                var dateCheck = date.AddYears(years);
+                var today = DateTime.Now;
+                if (dateCheck < today) return $"DATE must be at least {years} till today {today.ToString("dd-MM-yyyy")}.";
+            }
+
+            return null;
+        }
+
+        private static string ValidateValue(string value, bool canBeEmpty, List<string> parameters)
+        {
+            //Check if string can be empty
+            if (string.IsNullOrWhiteSpace(value) && !canBeEmpty) return "VALUE can not be empty.";
+
+            //Try to parse date
+            int v;
+            if (!int.TryParse(value, out v)) return "VALUE could not be parsed.";
+
+            //Check if we have minimum value
+            if (parameters.Count > 0)
+            {
+                var minimumValue = int.Parse(parameters[0]);
+                if (v < minimumValue) return $"VALUE can not be less than {minimumValue}.";
+            }
+
+            //Check if we have maximum value
+            if (parameters.Count > 1)
+            {
+                var maximumValue = int.Parse(parameters[1]);
+                if (v > maximumValue) return $"VALUE can not be more than {maximumValue}.";
+            }
+
+            return null;
+        }
+
+        private static void RemoveIllegalCharacters(ReportData reportData)
+        {
+            var illegalCharacters = new Regex(@",£");
+            foreach (var reportDataRow in reportData.Rows)
+            {
+                for (var index = 0; index < reportDataRow.Data.Count; index++)
+                {
+                    var str = reportDataRow.Data[index];
+                    reportDataRow.Data[index] = illegalCharacters.Replace(str, "");
+                }
+            }
         }
         #endregion
 
         #region HELP METHODS
+
         private Validation ParseValidationFile(IReadOnlyList<string> lines, string validationFile)
         {
             try
@@ -138,7 +314,7 @@ namespace LeadsImporter.Lib.Validation
                 var queryId = int.Parse(lines[0].Trim());
                 var columnName = lines[1].Trim();
                 var canBeEmpty = lines[2].ToLower().Trim() != "false";
-                var fieldType = (FieldType)Enum.Parse(typeof(FieldType), lines[3].ToUpper().Trim(), true);
+                var fieldType = (FieldType) Enum.Parse(typeof (FieldType), lines[3].ToUpper().Trim(), true);
                 var parameters = new List<string>();
                 //Additional parameters
                 if (lines.Count >= 5)
@@ -170,7 +346,7 @@ namespace LeadsImporter.Lib.Validation
                 if (lines.Count < 4) return false;
 
                 //1st line - report id - must be numeric
-                if(string.IsNullOrWhiteSpace(lines[0])) return false;
+                if (string.IsNullOrWhiteSpace(lines[0])) return false;
                 int n;
                 var isNumeric = int.TryParse(lines[0], out n);
                 if (!isNumeric)
@@ -211,6 +387,7 @@ namespace LeadsImporter.Lib.Validation
 
             return false;
         }
+
         #endregion
     }
 }

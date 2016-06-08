@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +23,19 @@ namespace LeadsImporter.Lib.Sql
         {
             Id = id;
             DateTime = dateTime;
+            Type = type;
+            LeadId = leadId;
+            CustomerId = customerId;
+            LenderId = lenderId;
+            LoanDate = loanDate;
+            LeadCreated = leadCreated;
+            ExceptionType = exceptionType;
+            ExceptionDescription = exceptionDescription;
+        }
+
+        //Constructor for insert
+        public SqlDataExceptionObject(string type, string leadId, string customerId, string lenderId, DateTime loanDate, DateTime leadCreated, string exceptionType, string exceptionDescription)
+        {
             Type = type;
             LeadId = leadId;
             CustomerId = customerId;

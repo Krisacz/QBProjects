@@ -20,8 +20,8 @@ namespace LeadsImporter.Tester
     {
         static void Main(string[] args)
         {
-            //var consoleLogger = new ConsoleLogger();
-            //var settings = SettingsReader.Read(consoleLogger);
+            var consoleLogger = new ConsoleLogger();
+            var settings = SettingsReader.Read(consoleLogger);
             //var sql = new SqlManager(consoleLogger, settings);
 
             //sql.InsertRecord("URSC", "666", "666", "666", new DateTime(2016, 1, 1), new DateTime(2016, 1, 1));
@@ -41,6 +41,8 @@ namespace LeadsImporter.Tester
             //var logger = new ConsoleLogger();
             //var settings = SettingsReader.Read(logger);
             //var ws = new AquariumWebService(consoleLogger, settings);
+            //var reportData = ws.GetReportData(38379);
+            //var stopHere = true;
 
             /*
             var reportData1 = new ReportData();

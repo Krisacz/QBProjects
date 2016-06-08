@@ -91,7 +91,22 @@ namespace LeadsImporter.Lib.Report
 
             return null;
         }
-        
+
+        public ReportSettings GetReportSettings(int queryId)
+        {
+            try
+            {
+                _logger.AddInfo("ReportsSettings >>> GetReportSettings: Getting report settings for query id...");
+                return _all.First(reportSettings => reportSettings.AquariumQueryId == queryId);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportsSettings >>> GetReportSettings: {ex.Message}");
+            }
+
+            return null;
+        }
+
         private void CreateIfNotExist()
         {
             try
@@ -129,7 +144,7 @@ namespace LeadsImporter.Lib.Report
                 return new ReportSettings()
                 {
                     Type = type,
-                    AquariumQueryId = aquariumQueryId,
+                    AquariumQueryId = Parse(aquariumQueryId),
                     ExecutionSequnece = Parse(executionSequnece),
                     LeadIdColumnName = leadIdColumnName,
                     CustomerIdColumnName = clientIdColumnName,
@@ -145,6 +160,11 @@ namespace LeadsImporter.Lib.Report
             }
 
             return null;
+        }
+
+        public string GetTypeFromQueryId(int reportId)
+        {
+            return _all.First(x => x.AquariumQueryId == reportId).Type;
         }
     }
 }

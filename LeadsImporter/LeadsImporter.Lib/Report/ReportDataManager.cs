@@ -6,27 +6,29 @@ namespace LeadsImporter.Lib.Report
     public class ReportDataManager
     {
         private readonly ILogger _logger;
+        private readonly ReportsSettings _reportsSettings;
 
-        public ReportDataManager(ILogger logger)
+        public ReportDataManager(ILogger logger, ReportsSettings reportsSettings)
         {
             _logger = logger;
+            _reportsSettings = reportsSettings;
         }
 
         private int? GetExistingReportDataRowIndex(ReportData existing, ReportData join, int joinRowIndex)
         {
             try
             {
-                var existingLeadIdColumnIndex = GetColumnIndex(existing, existing.Settings.LeadIdColumnName);
-                var existingCustomerIdColumnIndex = GetColumnIndex(existing, existing.Settings.CustomerIdColumnName);
-                var existingLenderIdColumnIndex = GetColumnIndex(existing, existing.Settings.LenderIdColumnName);
-                var existingLoanDateColumnIndex = GetColumnIndex(existing, existing.Settings.LoanDateColumnName);
-                var existingLeadCreatedColumnIndex = GetColumnIndex(existing, existing.Settings.LeadCreatedColumnName);
+                var existingLeadIdColumnIndex = GetColumnIndex(existing, _reportsSettings.GetReportSettings(existing.QueryId).LeadIdColumnName);
+                var existingCustomerIdColumnIndex = GetColumnIndex(existing, _reportsSettings.GetReportSettings(existing.QueryId).CustomerIdColumnName);
+                var existingLenderIdColumnIndex = GetColumnIndex(existing, _reportsSettings.GetReportSettings(existing.QueryId).LenderIdColumnName);
+                var existingLoanDateColumnIndex = GetColumnIndex(existing, _reportsSettings.GetReportSettings(existing.QueryId).LoanDateColumnName);
+                var existingLeadCreatedColumnIndex = GetColumnIndex(existing, _reportsSettings.GetReportSettings(existing.QueryId).LeadCreatedColumnName);
 
-                var joinLeadIdColumnIndex = GetColumnIndex(join, join.Settings.LeadIdColumnName);
-                var joinCustomerIdColumnIndex = GetColumnIndex(join, join.Settings.CustomerIdColumnName);
-                var joinLenderIdColumnIndex = GetColumnIndex(join, join.Settings.LenderIdColumnName);
-                var joinLoanDateColumnIndex = GetColumnIndex(join, join.Settings.LoanDateColumnName);
-                var joinLeadCreatedColumnIndex = GetColumnIndex(join, join.Settings.LeadCreatedColumnName);
+                var joinLeadIdColumnIndex = GetColumnIndex(join, _reportsSettings.GetReportSettings(join.QueryId).LeadIdColumnName);
+                var joinCustomerIdColumnIndex = GetColumnIndex(join, _reportsSettings.GetReportSettings(join.QueryId).CustomerIdColumnName);
+                var joinLenderIdColumnIndex = GetColumnIndex(join, _reportsSettings.GetReportSettings(join.QueryId).LenderIdColumnName);
+                var joinLoanDateColumnIndex = GetColumnIndex(join, _reportsSettings.GetReportSettings(join.QueryId).LoanDateColumnName);
+                var joinLeadCreatedColumnIndex = GetColumnIndex(join, _reportsSettings.GetReportSettings(join.QueryId).LeadCreatedColumnName);
 
                 for (var i = 0; i < existing.Rows.Count; i++)
                 {
@@ -91,7 +93,7 @@ namespace LeadsImporter.Lib.Report
                     for (var index = 0; index < joinReportDataRow.Data.Count; index++)
                     {
                         var joinReportDataHeader = joinReportData.Headers[index];
-                        if (ExcludeColumn(joinReportData.Settings, joinReportDataHeader)) continue;
+                        if (ExcludeColumn(_reportsSettings.GetReportSettings(joinReportData.QueryId), joinReportDataHeader)) continue;
                         var joinReportDataValue = joinReportDataRow.Data[index];
                         var existingReportDataRowIndex = GetExistingReportDataRowIndex(reportData, joinReportData, i);
                         if (existingReportDataRowIndex == null) continue;
@@ -109,6 +111,12 @@ namespace LeadsImporter.Lib.Report
         private static void AddHeaderIfNotExist(ReportData reportData, string newHeader)
         {
             if(!reportData.Headers.Contains(newHeader)) reportData.Headers.Add(newHeader);
+        }
+
+        public string GetValueForColumn(ReportData reportData, ReportDataRow row, string columnName)
+        {
+            var columnIndex = GetColumnIndex(reportData, columnName);
+            return row.Data[columnIndex];
         }
     }
 }

@@ -10,6 +10,7 @@ using LeadsImporter.Lib.Validation;
 
 namespace LeadsImporter.Lib.Flow
 {
+    //TODO Add logging
     public class FlowManager : IFlowManager
     {
         private readonly ICache _cache;
@@ -58,12 +59,14 @@ namespace LeadsImporter.Lib.Flow
                 //First in the sequence
                 if (s == 1)
                 {
-                    firstReportData = _webService.GetReportData(reportSettings.AquariumQueryId, reportSettings);
+                    var unvalidatedFirstReportData = _webService.GetReportData(reportSettings.AquariumQueryId);
+                    firstReportData = _validator.ValidateReport(unvalidatedFirstReportData);
                 }
                 //any sequential
                 else
                 {
-                    var reportData = _webService.GetReportData(reportSettings.AquariumQueryId, reportSettings);
+                    var unvalidatedReportData = _webService.GetReportData(reportSettings.AquariumQueryId);
+                    var reportData = _validator.ValidateReport(unvalidatedReportData);
                     _reportDataManager.Join(firstReportData, reportData);
                 }
             }
@@ -82,8 +85,8 @@ namespace LeadsImporter.Lib.Flow
         {
             var reportData = _cache.Get(type);
             _slqDataChecker.RemoveExceptions(reportData, exceptions);
-            var duplictes = _slqDataChecker.GetNewDuplicates(reportData, allData);
-            _sqlDataUpdater.SubmitNewDuplicates(duplictes);
+            var duplicates = _slqDataChecker.GetNewDuplicates(reportData, allData);
+            _sqlDataUpdater.SubmitNewExceptions(duplicates);
             _sqlDataUpdater.SubmitNewData(reportData);
             _cache.Store(type, reportData);
         }
@@ -99,7 +102,7 @@ namespace LeadsImporter.Lib.Flow
 
         private void CleanReport(string type)
         {
-            _validator.
+            //_validator.
             var reportData = _cache.Get(type);
         }
 
@@ -124,7 +127,7 @@ namespace LeadsImporter.Lib.Flow
             csv.Add(string.Empty);
 
             var fileName = $"import_{DateTime.Now.ToString("ddMMyyyy_HHmmss")}.csv";
-            var pathRoot = reportData.Settings.ProclaimDropPath;
+            var pathRoot = _reportsSettings.GetReportSettings(reportData.QueryId).ProclaimDropPath;
             var fullPath = Path.Combine(pathRoot, fileName);
 
             File.WriteAllLines(fullPath, csv);

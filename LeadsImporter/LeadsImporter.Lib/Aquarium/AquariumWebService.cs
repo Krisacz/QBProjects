@@ -13,15 +13,17 @@ namespace LeadsImporter.Lib.Aquarium
     {
         private readonly ILogger _logger;
         private readonly Settings.Settings _settings;
+        private readonly ReportsSettings _reportsSettings;
 
-        public AquariumWebService(ILogger logger, Settings.Settings settings)
+        public AquariumWebService(ILogger logger, Settings.Settings settings, ReportsSettings reportsSettings)
         {
             _logger = logger;
             _settings = settings;
+            _reportsSettings = reportsSettings;
         }
 
         #region FLOW
-        public ReportData GetReportData(string reportId, ReportSettings reportSettings)
+        public ReportData GetReportData(int reportId)
         {
             try
             {
@@ -30,7 +32,7 @@ namespace LeadsImporter.Lib.Aquarium
                 var headers = GetReportHeaders(response);
                 var dataRows = GetReportDataRows(response);
                 _logger.AddInfo($"WebService >>> GetReportData[{reportId}]: Received {headers.Count} headers and {dataRows.Count} data rows.");
-                return new ReportData() {Headers = headers, Rows = dataRows, Settings = reportSettings};
+                return new ReportData() {QueryId =  reportId, Headers = headers, Rows = dataRows};
             }
             catch (Exception ex)
             {
@@ -40,7 +42,7 @@ namespace LeadsImporter.Lib.Aquarium
             return null;
         }
 
-        private string GetReport(string queryId)
+        private string GetReport(int queryId)
         {
             try
             {
@@ -51,7 +53,7 @@ namespace LeadsImporter.Lib.Aquarium
 
                 //Report
                 _logger.AddInfo($"WebService >>> GetReport[{queryId}]: Calling GetReport method...");
-                var reportResponse = CallRunReport(sessionKey, queryId);
+                var reportResponse = CallRunReport(sessionKey, queryId.ToString());
                 return reportResponse;
             }
             catch (Exception ex)

@@ -53,7 +53,7 @@
     <Compile Include="Executer\TimerExecuter.cs" />
     <Compile Include="Flow\FlowManager.cs" />
     <Compile Include="Flow\IFlowManager.cs" />
-    <Compile Include="Flow\SqlDataUpdater.cs" />
+    <Compile Include="Report\ReportDataRow.cs" />
     <Compile Include="Sql\SqlDataChecker.cs" />
     <Compile Include="Log\FileLogger.cs" />
     <Compile Include="Log\ConsoleLogger.cs" />
@@ -67,6 +67,7 @@
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Sql\SqlDataObject.cs" />
     <Compile Include="Sql\SqlDataExceptionObject.cs" />
+    <Compile Include="Sql\SqlDataUpdater.cs" />
     <Compile Include="Sql\SqlManager.cs" />
     <Compile Include="Validation\FieldType.cs" />
     <Compile Include="Validation\Validation.cs" />

@@ -3,7 +3,7 @@
     public class ReportSettings
     {
         public string Type { get; set; }
-        public string AquariumQueryId { get; set; }
+        public int AquariumQueryId { get; set; }
         public int ExecutionSequnece { get; set; }
 
         public string LeadIdColumnName { get; set; }
