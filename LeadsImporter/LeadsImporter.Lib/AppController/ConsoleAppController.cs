@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using LeadsImporter.Lib.Cache;
+﻿using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Executer;
 using LeadsImporter.Lib.Flow;
 using LeadsImporter.Lib.Log;
@@ -22,10 +21,10 @@ namespace LeadsImporter.Lib.AppController
             var reportsSettings = new ReportsSettings(logger, settings).ReadAll();
             var reportDataManager = new ReportDataManager(logger, reportsSettings);
             var cache = new FileCache(logger, settings);
-            var sqlDataUpdater = new SqlDataUpdater();
-            var validator = new Validator(logger, settings, reportsSettings, reportDataManager, sqlDataUpdater).Read();
             var dataAccessor = new AquariumWebService(logger, settings);
             var sqlManager = new SqlManager(logger, settings);
+            var sqlDataUpdater = new SqlDataUpdater(sqlManager, logger);
+            var validator = new Validator(logger, settings, reportsSettings, reportDataManager, sqlDataUpdater).Read();
             var sqlDataChecker = new SqlDataChecker(reportsSettings, reportDataManager, logger);
             var flowManager = new FlowManager(cache, reportsSettings, dataAccessor, sqlManager, reportDataManager, sqlDataChecker, sqlDataUpdater, validator, logger);       
             _executer = new TimerExecuter(logger, settings, flowManager);

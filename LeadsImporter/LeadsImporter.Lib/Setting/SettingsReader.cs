@@ -4,7 +4,7 @@ using LeadsImporter.Lib.Log;
 
 namespace LeadsImporter.Lib.Setting
 {
-    public class SettingsReader
+    public static class SettingsReader
     {
         public static Settings Read(ILogger logger)
         {

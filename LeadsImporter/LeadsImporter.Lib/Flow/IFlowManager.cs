@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LeadsImporter.Lib.Flow
+﻿namespace LeadsImporter.Lib.Flow
 {
     public interface IFlowManager
     {
@@ -12,6 +6,5 @@ namespace LeadsImporter.Lib.Flow
         void ProcessReports();
         void SqlCheck();
         void Output();
-        void End();
     }
 }

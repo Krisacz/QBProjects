@@ -1,30 +1,52 @@
+using System;
 using System.Collections.Generic;
-using LeadsImporter.Lib.Report;
+using LeadsImporter.Lib.Log;
 
 namespace LeadsImporter.Lib.Sql
 {
-    //TODO Add logging
-    //TODO Implementation
     public class SqlDataUpdater
     {
         private readonly SqlManager _sqlManager;
+        private readonly ILogger _logger;
 
-        public SqlDataUpdater(SqlManager sqlManager)
+        public SqlDataUpdater(SqlManager sqlManager, ILogger logger)
         {
             _sqlManager = sqlManager;
+            _logger = logger;
         }
 
-        public void SubmitNewData(List<SqlDataObject> newData)
+        #region SUBMIT NEW DATA
+        public void SubmitNewData(IEnumerable<SqlDataObject> newData)
         {
-            foreach (var sqlDataObject in newData)
+            try
             {
-                _sqlManager.InsertRecord(sqlDataObject);
+                foreach (var sqlDataObject in newData)
+                {
+                    _sqlManager.InsertRecord(sqlDataObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"SqlDataUpdater >>> SubmitNewData: {ex.Message}");
             }
         }
+        #endregion
 
-        public void SubmitNewExceptions(List<SqlDataExceptionObject> exceptions)
+        #region SUBMIT NEW EXCEPTIONS
+        public void SubmitNewExceptions(IEnumerable<SqlDataExceptionObject> exceptions)
         {
-
+            try
+            {
+                foreach (var exceptionObject in exceptions)
+                {
+                    _sqlManager.InsertException(exceptionObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"SqlDataUpdater >>> SubmitNewExceptions: {ex.Message}");
+            }
         }
+        #endregion
     }
 }

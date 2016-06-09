@@ -24,6 +24,7 @@ namespace LeadsImporter.Lib.Executer
             _timer.Interval = Parse(settings.PoolingTimeInSec) * 1000;
         }
 
+        #region START
         public void Start()
         {
             try
@@ -36,7 +37,9 @@ namespace LeadsImporter.Lib.Executer
                 _logger.AddError($"TimerExecuter >>> Start: {ex.Message}");
             }
         }
+        #endregion
 
+        #region STOP
         public void Stop()
         {
             try
@@ -49,7 +52,9 @@ namespace LeadsImporter.Lib.Executer
                 _logger.AddError($"TimerExecuter >>> Stop: {ex.Message}");
             }
         }
+        #endregion
 
+        #region EXECUTE
         private void Execute(object sender, ElapsedEventArgs e)
         {
             Execute();
@@ -67,7 +72,6 @@ namespace LeadsImporter.Lib.Executer
                 _flowManager.ProcessReports();
                 _flowManager.SqlCheck();
                 _flowManager.Output();
-                _flowManager.End();
 
                 _logger.AddInfo("TimerExecuter >>> Execute: Finished!");
                 _logger.AddInfo("TimerExecuter >>> Execute: (Sleeping)");
@@ -82,5 +86,6 @@ namespace LeadsImporter.Lib.Executer
                 _timer.Enabled = true;
             }
         }
+        #endregion
     }
 }

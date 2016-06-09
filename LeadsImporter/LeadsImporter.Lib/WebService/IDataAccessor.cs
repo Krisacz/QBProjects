@@ -21,6 +21,7 @@ namespace LeadsImporter.Lib.WebService
             }
         }
 
+        #region GET URSC REPORT
         private static ReportData GetUrscReport()
         {
             return new ReportData()
@@ -37,7 +38,9 @@ namespace LeadsImporter.Lib.WebService
                 }
             };
         }
+        #endregion
 
+        #region GET RPPI REPORT
         private static ReportData GetRppiReport()
         {
             return new ReportData()
@@ -54,5 +57,6 @@ namespace LeadsImporter.Lib.WebService
                 }
             };
         }
+        #endregion
     }
 }

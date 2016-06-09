@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LeadsImporter.Lib.Sql
 {
@@ -29,7 +25,7 @@ namespace LeadsImporter.Lib.Sql
             LeadCreated = leadCreated;
         }
 
-        //For submission
+        //Constructor for insert
         public SqlDataObject(string type, string leadId, string customerId, string lenderId, DateTime loanDate, DateTime leadCreated)
         {
             Type = type;

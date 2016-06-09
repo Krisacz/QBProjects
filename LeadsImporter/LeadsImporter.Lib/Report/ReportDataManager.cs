@@ -6,6 +6,7 @@ namespace LeadsImporter.Lib.Report
     public class ReportDataManager
     {
         private readonly ILogger _logger;
+
         private readonly ReportsSettings _reportsSettings;
 
         public ReportDataManager(ILogger logger, ReportsSettings reportsSettings)
@@ -14,6 +15,51 @@ namespace LeadsImporter.Lib.Report
             _reportsSettings = reportsSettings;
         }
 
+        #region JOIN
+        public void Join(ReportData reportData, ReportData joinReportData)
+        {
+            try
+            {
+                for (var i = 0; i < joinReportData.Rows.Count; i++)
+                {
+                    var joinReportDataRow = joinReportData.Rows[i];
+                    for (var index = 0; index < joinReportDataRow.Data.Count; index++)
+                    {
+                        var joinReportDataHeader = joinReportData.Headers[index];
+                        if (ExcludeColumn(_reportsSettings.GetReportSettings(joinReportData.QueryId), joinReportDataHeader)) continue;
+                        var joinReportDataValue = joinReportDataRow.Data[index];
+                        var existingReportDataRowIndex = GetExistingReportDataRowIndex(reportData, joinReportData, i);
+                        if (existingReportDataRowIndex == null) continue;
+                        AddHeaderIfNotExist(reportData, joinReportDataHeader);
+                        reportData.Rows[(int)existingReportDataRowIndex].Data.Add(joinReportDataValue);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> Join: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region GET VALUE FOR COLUMN
+        public string GetValueForColumn(ReportData reportData, ReportDataRow row, string columnName)
+        {
+            try
+            {
+                var columnIndex = GetColumnIndex(reportData, columnName);
+                return row.Data[columnIndex];
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> GetValueForColumn: {ex.Message}");
+            }
+
+            return null;
+        }
+        #endregion
+
+        #region HELP METHODS
         private int? GetExistingReportDataRowIndex(ReportData existing, ReportData join, int joinRowIndex)
         {
             try
@@ -83,31 +129,6 @@ namespace LeadsImporter.Lib.Report
                    || reportSettings.LeadCreatedColumnName == header;
         }
 
-        public void Join(ReportData reportData, ReportData joinReportData)
-        {
-            try
-            {
-                for (var i = 0; i < joinReportData.Rows.Count; i++)
-                {
-                    var joinReportDataRow = joinReportData.Rows[i];
-                    for (var index = 0; index < joinReportDataRow.Data.Count; index++)
-                    {
-                        var joinReportDataHeader = joinReportData.Headers[index];
-                        if (ExcludeColumn(_reportsSettings.GetReportSettings(joinReportData.QueryId), joinReportDataHeader)) continue;
-                        var joinReportDataValue = joinReportDataRow.Data[index];
-                        var existingReportDataRowIndex = GetExistingReportDataRowIndex(reportData, joinReportData, i);
-                        if (existingReportDataRowIndex == null) continue;
-                        AddHeaderIfNotExist(reportData, joinReportDataHeader);
-                        reportData.Rows[(int)existingReportDataRowIndex].Data.Add(joinReportDataValue);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.AddError($"ReportDataManager >>> Join: {ex.Message}");
-            }
-        }
-
         private void AddHeaderIfNotExist(ReportData reportData, string newHeader)
         {
             try
@@ -119,20 +140,6 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddError($"ReportDataManager >>> AddHeaderIfNotExist: {ex.Message}");
             }
         }
-
-        public string GetValueForColumn(ReportData reportData, ReportDataRow row, string columnName)
-        {
-            try
-            {
-                var columnIndex = GetColumnIndex(reportData, columnName);
-                return row.Data[columnIndex];
-            }
-            catch (Exception ex)
-            {
-                _logger.AddError($"ReportDataManager >>> GetValueForColumn: {ex.Message}");
-            }
-
-            return null;
-        }
+        #endregion
     }
 }

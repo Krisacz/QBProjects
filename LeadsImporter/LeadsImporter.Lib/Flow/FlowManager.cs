@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
@@ -23,7 +22,8 @@ namespace LeadsImporter.Lib.Flow
         private readonly Validator _validator;
         private readonly ILogger _logger;
 
-        public FlowManager(ICache cache, ReportsSettings reportsSettings, IDataAccessor dataAccessor, SqlManager sqlManager, ReportDataManager reportDataManager, SqlDataChecker slqDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator, ILogger logger)
+        public FlowManager(ICache cache, ReportsSettings reportsSettings, IDataAccessor dataAccessor, SqlManager sqlManager, 
+            ReportDataManager reportDataManager, SqlDataChecker slqDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator, ILogger logger)
         {
             _cache = cache;
             _reportsSettings = reportsSettings;
@@ -36,6 +36,7 @@ namespace LeadsImporter.Lib.Flow
             _logger = logger;
         }
 
+        #region INIT
         public void Init()
         {
             try
@@ -47,7 +48,9 @@ namespace LeadsImporter.Lib.Flow
                 _logger.AddError($"FlowManager >>> Init: {ex.Message}");
             }
         }
+        #endregion
 
+        #region PROCESS REPORTS
         public void ProcessReports()
         {
             try
@@ -64,12 +67,12 @@ namespace LeadsImporter.Lib.Flow
                 _logger.AddError($"FlowManager >>> ProcessReports: {ex.Message}");
             }
         }
-
+        
         private void ProcessReport(string type)
         {
             try
             {
-                var sequences = _reportsSettings.GetSequencesPerType(type);
+                var sequences = _reportsSettings.GetSequencesCountForType(type);
                 ReportData firstReportData = null;
                 for (var s = 1; s <= sequences; s++)
                 {
@@ -95,7 +98,9 @@ namespace LeadsImporter.Lib.Flow
                 _logger.AddError($"FlowManager >>> ProcessReport[{type}]: {ex.Message}");
             }
         }
+        #endregion
 
+        #region SQL CHECK
         public void SqlCheck()
         {
             try
@@ -116,12 +121,12 @@ namespace LeadsImporter.Lib.Flow
             try
             {
                 var reportData = _cache.Get(type);
-                _slqDataChecker.RemoveExceptions(reportData, exceptions);
-                var duplicates = _slqDataChecker.GetNewDuplicates(reportData, allData);
+                var reportDataWithoutExceptions = _slqDataChecker.RemoveExceptions(reportData, exceptions);
+                var duplicates = _slqDataChecker.GetNewDuplicates(reportDataWithoutExceptions, allData);
                 _sqlDataUpdater.SubmitNewExceptions(duplicates);
-                var newData = GetReportDataAsSqlDataObject(reportData);
-                _sqlDataUpdater.SubmitNewData(reportData);
-                _cache.Store(type, reportData);
+                var newData = GetReportDataAsSqlDataObject(reportDataWithoutExceptions);
+                _sqlDataUpdater.SubmitNewData(newData);
+                _cache.Store(type, reportDataWithoutExceptions);
             }
             catch (Exception ex)
             {
@@ -159,7 +164,9 @@ namespace LeadsImporter.Lib.Flow
 
             return null;
         }
+        #endregion
 
+        #region OUTPUT
         public void Output()
         {
             try
@@ -200,10 +207,6 @@ namespace LeadsImporter.Lib.Flow
                 _logger.AddError($"FlowManager >>> SaveReport[{type}]: {ex.Message}");
             }
         }
-
-        public void End()
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }

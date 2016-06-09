@@ -4,11 +4,6 @@ namespace LeadsImporter.Lib.Log
 {
     public class ConsoleLogger : ILogger
     {
-        public void AddEmptyLine()
-        {
-            Console.WriteLine();
-        }
-
         public void AddError(string error)
         {
             var dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

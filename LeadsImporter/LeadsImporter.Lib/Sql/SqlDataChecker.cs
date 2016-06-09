@@ -68,7 +68,7 @@ namespace LeadsImporter.Lib.Sql
         #endregion
 
         #region GET NEW DUPLICATES
-        public List<SqlDataExceptionObject> GetNewDuplicates(ReportData reportData, IEnumerable<SqlDataObject> allData)
+        public IEnumerable<SqlDataExceptionObject> GetNewDuplicates(ReportData reportData, IEnumerable<SqlDataObject> allData)
         {
             try
             {

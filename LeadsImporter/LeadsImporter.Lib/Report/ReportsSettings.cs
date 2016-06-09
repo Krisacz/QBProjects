@@ -21,6 +21,7 @@ namespace LeadsImporter.Lib.Report
             _settings = settings;
         }
 
+        #region READ ALL
         public ReportsSettings ReadAll()
         {
             try
@@ -46,7 +47,9 @@ namespace LeadsImporter.Lib.Report
 
             return this;
         }
+        #endregion
 
+        #region GET TYPES
         public IEnumerable<string> GetTypes()
         {
             try
@@ -61,12 +64,14 @@ namespace LeadsImporter.Lib.Report
 
             return null;
         }
+        #endregion
 
-        public int? GetSequencesPerType(string type)
+        #region GET SEQUENCES COUNT FOR TYPE
+        public int? GetSequencesCountForType(string type)
         {
             try
             {
-                _logger.AddInfo("ReportsSettings >>> GetSequencesPerType: Getting sequences count per type...");
+                _logger.AddInfo("ReportsSettings >>> GetSequencesCountForType: Getting sequences count per type...");
                 return _all.Count(reportSettings => reportSettings.Type == type);
             }
             catch (Exception ex)
@@ -76,7 +81,9 @@ namespace LeadsImporter.Lib.Report
 
             return null;
         }
+        #endregion
 
+        #region GET REPORTS SETTINGS
         public ReportSettings GetReportSettings(string type, int sequence)
         {
             try
@@ -91,7 +98,7 @@ namespace LeadsImporter.Lib.Report
 
             return null;
         }
-
+        
         public ReportSettings GetReportSettings(int queryId)
         {
             try
@@ -106,7 +113,25 @@ namespace LeadsImporter.Lib.Report
 
             return null;
         }
+        #endregion
 
+        #region GET TYPE FROM QUERY ID
+        public string GetTypeFromQueryId(int reportId)
+        {
+            try
+            {
+                return _all.First(x => x.AquariumQueryId == reportId).Type;
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportsSettings >>> GetTypeFromQueryId: {ex.Message}");
+            }
+
+            return null;
+        }
+        #endregion
+
+        #region HELP METHODS
         private void CreateIfNotExist()
         {
             try
@@ -160,19 +185,6 @@ namespace LeadsImporter.Lib.Report
 
             return null;
         }
-
-        public string GetTypeFromQueryId(int reportId)
-        {
-            try
-            {
-                return _all.First(x => x.AquariumQueryId == reportId).Type;
-            }
-            catch (Exception ex)
-            {
-                _logger.AddError($"ReportsSettings >>> GetTypeFromQueryId: {ex.Message}");
-            }
-
-            return null;
-        }
+        #endregion
     }
 }

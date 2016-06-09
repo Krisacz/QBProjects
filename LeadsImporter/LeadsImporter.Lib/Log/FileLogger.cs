@@ -12,12 +12,6 @@ namespace LeadsImporter.Lib.Log
             if (!File.Exists(LogFile)) File.Create(LogFile);
         }
 
-        public void AddEmptyLine()
-        {
-            var newLine = Environment.NewLine;
-            File.AppendAllText(LogFile, newLine);
-        }
-
         public void AddError(string error)
         {
             var dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

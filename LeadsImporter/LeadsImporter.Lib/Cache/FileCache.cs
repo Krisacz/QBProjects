@@ -19,6 +19,7 @@ namespace LeadsImporter.Lib.Cache
             _settings = settings;
         }
 
+        #region CLEAR
         public void Clear()
         {
             try
@@ -30,10 +31,12 @@ namespace LeadsImporter.Lib.Cache
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FileCache >>> Store: {ex.Message}");
+                _logger.AddError($"FileCache >>> Clear: {ex.Message}");
             }
         }
+        #endregion
 
+        #region STORE
         public void Store(string type, ReportData data)
         {
             try
@@ -57,7 +60,9 @@ namespace LeadsImporter.Lib.Cache
                 _logger.AddError($"FileCache >>> Store: {ex.Message}");
             }
         }
+        #endregion
 
+        #region GET
         public ReportData Get(string type)
         {
             try
@@ -79,5 +84,6 @@ namespace LeadsImporter.Lib.Cache
 
             return null;
         }
+        #endregion
     }
 }
