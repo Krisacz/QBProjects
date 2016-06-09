@@ -46,7 +46,7 @@
     <Compile Include="AppController\ConsoleAppController.cs" />
     <Compile Include="AppController\IAppController.cs" />
     <Compile Include="AppController\WinServiceAppController.cs" />
-    <Compile Include="WebService\AquariumWebService.cs" />
+    <Compile Include="DataAccessor\AquariumWebService.cs" />
     <Compile Include="Cache\FileCache.cs" />
     <Compile Include="Cache\ICache.cs" />
     <Compile Include="Cache\InMemoryCache.cs" />
@@ -74,7 +74,7 @@
     <Compile Include="Validation\Validation.cs" />
     <Compile Include="Validation\Validations.cs" />
     <Compile Include="Validation\Validator.cs" />
-    <Compile Include="WebService\IDataAccessor.cs" />
+    <Compile Include="DataAccessor\IDataAccessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

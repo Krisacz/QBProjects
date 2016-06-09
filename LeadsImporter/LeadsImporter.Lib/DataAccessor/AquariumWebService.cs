@@ -8,7 +8,7 @@ using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
 using LeadsImporter.Lib.Setting;
 
-namespace LeadsImporter.Lib.WebService
+namespace LeadsImporter.Lib.DataAccessor
 {
     public class AquariumWebService : IDataAccessor
     {

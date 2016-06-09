@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using LeadsImporter.Lib.Report;
 
-namespace LeadsImporter.Lib.WebService
+namespace LeadsImporter.Lib.DataAccessor
 {
     public interface IDataAccessor
     {
