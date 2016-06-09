@@ -115,10 +115,11 @@ namespace LeadsImporter.Lib.Flow
             }
         }
 
-        private void CheckData(string type, IEnumerable<SqlDataExceptionObject> exceptions, IEnumerable<SqlDataObject> allData)
+        private void CheckData(string type, List<SqlDataExceptionObject> exceptions, IEnumerable<SqlDataObject> allData)
         {
             try
             {
+                //TODO here or somewhere - after removing exceptions and duplicates final  data set needs to be checked for duplicates within itself!
                 var reportData = _cache.Get(type);
                 var reportDataWithoutExceptions = _slqDataChecker.RemoveExceptions(reportData, exceptions);
                 var duplicates = _slqDataChecker.GetNewDuplicates(reportDataWithoutExceptions, allData);

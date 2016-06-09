@@ -16,7 +16,7 @@ namespace LeadsImporter.Lib.AppController
 
         public ConsoleAppController()
         {
-            var logger = new ConsoleLogger();
+            var logger = new ConsoleLogger {EnableDetailedLog = true};
             var settings = SettingsReader.Read(logger);
             var reportsSettings = new ReportsSettings(logger).ReadAll();
             var reportDataManager = new ReportDataManager(logger, reportsSettings);

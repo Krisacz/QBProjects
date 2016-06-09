@@ -26,16 +26,16 @@ namespace LeadsImporter.Lib.DataAccessor
         {
             try
             {
-                _logger.AddInfo($"WebService >>> GetReportData[{reportId}]: Starting WebService calls...");
+                _logger.AddInfo($"AquariumWebService >>> GetReportData[{reportId}]: Starting AquariumWebService calls...");
                 var response = GetReport(reportId);
                 var headers = GetReportHeaders(response);
                 var dataRows = GetReportDataRows(response);
-                _logger.AddInfo($"WebService >>> GetReportData[{reportId}]: Received {headers.Count} headers and {dataRows.Count} data rows.");
+                _logger.AddInfo($"AquariumWebService >>> GetReportData[{reportId}]: Received {headers.Count} headers and {dataRows.Count} data rows.");
                 return new ReportData() {QueryId =  reportId, Headers = headers, Rows = dataRows};
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> GetReport: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReport: {ex.Message}");
             }
 
             return null;
@@ -46,18 +46,18 @@ namespace LeadsImporter.Lib.DataAccessor
             try
             {
                 //Logon
-                _logger.AddInfo($"WebService >>> GetReport[{queryId}]: Calling Logon method...");
+                _logger.AddDetailedLog($"AquariumWebService >>> GetReport[{queryId}]: Calling Logon method...");
                 var logonResponse = CallLogon();
                 var sessionKey = GetSessionKey(logonResponse);
 
                 //Report
-                _logger.AddInfo($"WebService >>> GetReport[{queryId}]: Calling GetReport method...");
+                _logger.AddDetailedLog($"AquariumWebService >>> GetReport[{queryId}]: Calling GetReport method...");
                 var reportResponse = CallRunReport(sessionKey, queryId.ToString());
                 return reportResponse;
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> GetReport[{queryId}]: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReport[{queryId}]: {ex.Message}");
             }
 
             return null;
@@ -92,12 +92,13 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> CallLogon: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CallLogon: {ex.Message}");
             }
 
             return null;
         }
 
+        //Not in use at the moment - gives list of existing reports - might be useful in the future
         private string CallGetReports(string sessionKey, string queryId)
         {
             try
@@ -124,7 +125,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> CallGetReports: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CallGetReports: {ex.Message}");
             }
 
             return null;
@@ -156,7 +157,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> CallRunReport: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CallRunReport: {ex.Message}");
             }
 
             return null;
@@ -174,7 +175,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> CreateSoapEnvelope: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CreateSoapEnvelope: {ex.Message}");
             }
 
             return null;
@@ -193,7 +194,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> CreateWebRequest: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CreateWebRequest: {ex.Message}");
             }
 
             return null;
@@ -210,7 +211,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> InsertSoapEnvelopeIntoWebRequest: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> InsertSoapEnvelopeIntoWebRequest: {ex.Message}");
             }
         }
         #endregion
@@ -285,7 +286,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> GetSessionKey: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetSessionKey: {ex.Message}");
             }
 
             return null;
@@ -295,7 +296,7 @@ namespace LeadsImporter.Lib.DataAccessor
         {
             try
             {
-                _logger.AddInfo($"WebService >>> GetReportHeaders: Extracting headers...");
+                _logger.AddInfo($"AquariumWebService >>> GetReportHeaders: Extracting headers...");
                 var columns = new List<string>();
                 var xmlDocument = new XmlDocument();
                 xmlDocument.LoadXml(response);
@@ -306,7 +307,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> GetColumns: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetColumns: {ex.Message}");
             }
 
             return null;
@@ -316,7 +317,7 @@ namespace LeadsImporter.Lib.DataAccessor
         {
             try
             {
-                _logger.AddInfo($"WebService >>> GetReportHeaders: Extracting data rows...");
+                _logger.AddInfo($"AquariumWebService >>> GetReportHeaders: Extracting data rows...");
                 var dataRows = new List<ReportDataRow>();
                 var xmlDocument = new XmlDocument();
                 xmlDocument.LoadXml(response);
@@ -335,7 +336,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"WebService >>> GetColumns: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetColumns: {ex.Message}");
             }
 
             return null;

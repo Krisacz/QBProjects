@@ -17,7 +17,7 @@ namespace LeadsImporter.Lib.Sql
         }
 
         #region REMOVE EXCEPTIONS
-        public ReportData RemoveExceptions(ReportData reportData, IEnumerable<SqlDataExceptionObject> exceptions)
+        public ReportData RemoveExceptions(ReportData reportData, List<SqlDataExceptionObject> exceptions)
         {
             try
             {
@@ -49,6 +49,9 @@ namespace LeadsImporter.Lib.Sql
                         }
                     }
                 }
+
+                //If there are no exceptions - assume all rows as valid
+                if(exceptions.Count == 0) reportDataWithoutExceptions.Rows.AddRange(reportData.Rows);
 
                 return reportDataWithoutExceptions;
             }

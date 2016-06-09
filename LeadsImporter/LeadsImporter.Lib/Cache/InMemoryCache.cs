@@ -20,7 +20,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddInfo($"InMemoryCache >>> Clear: Clearing all cache data...");
+                _logger.AddDetailedLog($"InMemoryCache >>> Clear: Clearing all cache data...");
                 _cache.Clear();
             }
             catch (Exception ex)
@@ -35,7 +35,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddInfo($"FileCache >>> Store: Caching data...");
+                _logger.AddDetailedLog($"FileCache >>> Store: Caching data for {type}...");
                 if (_cache.ContainsKey(type))
                 {
                     _cache[type] = data;
@@ -47,7 +47,7 @@ namespace LeadsImporter.Lib.Cache
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FileCache >>> Store: {ex.Message}");
+                _logger.AddError($"FileCache >>> Store[{type}]: {ex.Message}");
             }
         }
         #endregion
@@ -57,7 +57,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddInfo($"FileCache >>> Get[{type}]: Getting data...");
+                _logger.AddDetailedLog($"FileCache >>> Get: Getting data for {type}...");
                 return _cache[type];
             }
             catch (Exception ex)

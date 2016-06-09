@@ -16,7 +16,7 @@ namespace LeadsImporter.Lib.AppController
 
         public WinServiceAppController()
         {
-            var logger = new FileLogger();
+            var logger = new FileLogger() {EnableDetailedLog = false};
             var settings = SettingsReader.Read(logger);
             var reportsSettings = new ReportsSettings(logger).ReadAll();
             var reportDataManager = new ReportDataManager(logger, reportsSettings);

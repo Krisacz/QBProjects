@@ -311,7 +311,7 @@ namespace LeadsImporter.Lib.Validation
         {
             try
             {
-                var illegalCharacters = new Regex(@",£");
+                var illegalCharacters = new Regex(@"[,£]");
                 foreach (var reportDataRow in reportData.Rows)
                 {
                     for (var index = 0; index < reportDataRow.Data.Count; index++)

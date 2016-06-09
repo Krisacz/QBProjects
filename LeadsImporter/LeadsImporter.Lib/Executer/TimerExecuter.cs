@@ -65,16 +65,14 @@ namespace LeadsImporter.Lib.Executer
             try
             {
                 _timer.Enabled = false;
-                _logger.AddInfo("TimerExecuter >>> Execute: (Waking up)");
-                _logger.AddInfo("TimerExecuter >>> Execute: Executing...");
+                _logger.AddInfo("TimerExecuter >>> Execute: (Waking up) Executing...");
 
                 _flowManager.Init();
                 _flowManager.ProcessReports();
                 _flowManager.SqlCheck();
                 _flowManager.Output();
 
-                _logger.AddInfo("TimerExecuter >>> Execute: Finished!");
-                _logger.AddInfo("TimerExecuter >>> Execute: (Sleeping)");
+                _logger.AddInfo("TimerExecuter >>> Execute: Finished! (Sleeping...)");
                 _timer.Enabled = true;
             }
             catch (Exception ex)

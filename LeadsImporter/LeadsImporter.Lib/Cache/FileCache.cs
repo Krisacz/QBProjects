@@ -22,7 +22,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddInfo($"FileCache >>> Clear: Clearing all cache data...");
+                _logger.AddDetailedLog($"FileCache >>> Clear: Clearing all cache data...");
                 var di = new DirectoryInfo(_tempCachePath);
                 foreach (var file in di.GetFiles()) file.Delete();
                 foreach (var dir in di.GetDirectories()) dir.Delete(true);
@@ -39,7 +39,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddInfo($"FileCache >>> Store: Caching data...");
+                _logger.AddDetailedLog($"FileCache >>> Store: Caching data for {type}...");
                 Directory.CreateDirectory(_tempCachePath);
                 var serializer = new XmlSerializer(typeof(ReportData));
                 var xmlWriterSettings = new XmlWriterSettings {Indent = true, IndentChars = "  ", NewLineChars = "\r\n", NewLineHandling = NewLineHandling.Replace };
@@ -55,7 +55,7 @@ namespace LeadsImporter.Lib.Cache
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FileCache >>> Store: {ex.Message}");
+                _logger.AddError($"FileCache >>> Store[{type}]: {ex.Message}");
             }
         }
         #endregion
@@ -65,7 +65,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddInfo($"FileCache >>> Get[{type}]: Getting data...");
+                _logger.AddDetailedLog($"FileCache >>> Get: Getting data for {type}...");
                 ReportData data = null;
                 var xmlSerializer = new XmlSerializer(typeof(ReportData));
                 var fileName = $"{type}.xml";

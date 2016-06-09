@@ -17,7 +17,7 @@ namespace LeadsImporter.Tester
             switch (runType)
             {
                 case RunType.TopShelfLive:
-                        #region TOP SHELF
+                        #region TOP SHELF - LIVE
                         HostFactory.Run(x =>
                         {
                             x.Service<IAppController>(s =>
@@ -35,7 +35,7 @@ namespace LeadsImporter.Tester
                     break;
 
                 case RunType.ConsoleLive:
-                        #region CONSOLE
+                        #region CONSOLE - LIVE
                         Console.WriteLine("Press Escape to Stop & Exit.");
                         Console.WriteLine("=============================");
                         Console.WriteLine();
@@ -54,7 +54,7 @@ namespace LeadsImporter.Tester
                     break;
 
                 case RunType.ConsoleTest:
-                        #region CONSOLE
+                        #region CONSOLE - TEST
                         Console.WriteLine("Press Escape to Stop & Exit.");
                         Console.WriteLine("=============================");
                         Console.WriteLine();
