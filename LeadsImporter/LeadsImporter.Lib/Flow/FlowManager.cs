@@ -13,7 +13,6 @@ namespace LeadsImporter.Lib.Flow
     public class FlowManager : IFlowManager
     {
         private readonly ICache _cache;
-        private readonly ReportsSettings _reportsSettings;
         private readonly IDataAccessor _dataAccessor;
         private readonly SqlManager _sqlManager;
         private readonly ReportDataManager _reportDataManager;
@@ -22,11 +21,10 @@ namespace LeadsImporter.Lib.Flow
         private readonly Validator _validator;
         private readonly ILogger _logger;
 
-        public FlowManager(ICache cache, ReportsSettings reportsSettings, IDataAccessor dataAccessor, SqlManager sqlManager, 
+        public FlowManager(ICache cache, IDataAccessor dataAccessor, SqlManager sqlManager, 
             ReportDataManager reportDataManager, SqlDataChecker slqDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator, ILogger logger)
         {
             _cache = cache;
-            _reportsSettings = reportsSettings;
             _dataAccessor = dataAccessor;
             _sqlManager = sqlManager;
             _slqDataChecker = slqDataChecker;
@@ -55,7 +53,7 @@ namespace LeadsImporter.Lib.Flow
         {
             try
             {
-                var types = _reportsSettings.GetTypes();
+                var types = _reportDataManager.GetReportTypes();
 
                 foreach (var type in types)
                 {
@@ -72,21 +70,22 @@ namespace LeadsImporter.Lib.Flow
         {
             try
             {
-                var sequences = _reportsSettings.GetSequencesCountForType(type);
+                var sequences = _reportDataManager.GetSequencesCountForType(type);
                 ReportData firstReportData = null;
                 for (var s = 1; s <= sequences; s++)
                 {
-                    var reportSettings = _reportsSettings.GetReportSettings(type, s);
+                    var queryId = _reportDataManager.GetReportQueryId(type, s);
+
                     //First in the sequence
                     if (s == 1)
                     {
-                        var unvalidatedFirstReportData = _dataAccessor.GetReportData(reportSettings.AquariumQueryId);
+                        var unvalidatedFirstReportData = _dataAccessor.GetReportData(queryId);
                         firstReportData = _validator.ValidateReport(unvalidatedFirstReportData);
                     }
                     //any sequential
                     else
                     {
-                        var unvalidatedReportData = _dataAccessor.GetReportData(reportSettings.AquariumQueryId);
+                        var unvalidatedReportData = _dataAccessor.GetReportData(queryId);
                         var reportData = _validator.ValidateReport(unvalidatedReportData);
                         _reportDataManager.Join(firstReportData, reportData);
                     }
@@ -107,7 +106,7 @@ namespace LeadsImporter.Lib.Flow
             {
                 var exceptions = _sqlManager.GetAllExceptions();
                 var allData = _sqlManager.GetAllData();
-                var types = _reportsSettings.GetTypes();
+                var types = _reportDataManager.GetReportTypes();
                 foreach (var type in types) CheckData(type, exceptions, allData);
             }
             catch (Exception ex)
@@ -141,17 +140,12 @@ namespace LeadsImporter.Lib.Flow
                 var list = new List<SqlDataObject>();
                 foreach (var reportDataRow in reportData.Rows)
                 {
-                    var type = _reportsSettings.GetTypeFromQueryId(reportData.QueryId);
-                    var leadId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
-                    var customerId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
-                    var lenderId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
-                    var loanDate = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
-                    var leadCreated = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                        _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
+                    var type = _reportDataManager.GetReportType(reportData);
+                    var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
+                    var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
+                    var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
+                    var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
+                    var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
 
                     list.Add(new SqlDataObject(type, leadId, customerId, lenderId, loanDate, leadCreated));
                 }
@@ -171,7 +165,7 @@ namespace LeadsImporter.Lib.Flow
         {
             try
             {
-                var types = _reportsSettings.GetTypes();
+                var types = _reportDataManager.GetReportTypes();
                 foreach (var type in types)
                 {
                     SaveReport(type);
@@ -197,7 +191,7 @@ namespace LeadsImporter.Lib.Flow
                 csv.Add(string.Empty);
 
                 var fileName = $"import_{DateTime.Now.ToString("ddMMyyyy_HHmmss")}.csv";
-                var pathRoot = _reportsSettings.GetReportSettings(reportData.QueryId).ProclaimDropPath;
+                var pathRoot = _reportDataManager.GetOutputPath(reportData);
                 var fullPath = Path.Combine(pathRoot, fileName);
 
                 File.WriteAllLines(fullPath, csv);

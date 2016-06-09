@@ -4,19 +4,17 @@ using System.Xml;
 using System.Xml.Serialization;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
-using LeadsImporter.Lib.Setting;
 
 namespace LeadsImporter.Lib.Cache
 {
     public class FileCache : ICache
     {
         private readonly ILogger _logger;
-        private readonly Settings _settings;
+        private readonly string _tempCachePath = @"Temp\\";
 
-        public FileCache(ILogger logger, Settings settings)
+        public FileCache(ILogger logger)
         {
             _logger = logger;
-            _settings = settings;
         }
 
         #region CLEAR
@@ -25,7 +23,7 @@ namespace LeadsImporter.Lib.Cache
             try
             {
                 _logger.AddInfo($"FileCache >>> Clear: Clearing all cache data...");
-                var di = new DirectoryInfo(_settings.TempCachePath);
+                var di = new DirectoryInfo(_tempCachePath);
                 foreach (var file in di.GetFiles()) file.Delete();
                 foreach (var dir in di.GetDirectories()) dir.Delete(true);
             }
@@ -42,7 +40,7 @@ namespace LeadsImporter.Lib.Cache
             try
             {
                 _logger.AddInfo($"FileCache >>> Store: Caching data...");
-                Directory.CreateDirectory(_settings.TempCachePath);
+                Directory.CreateDirectory(_tempCachePath);
                 var serializer = new XmlSerializer(typeof(ReportData));
                 var xmlWriterSettings = new XmlWriterSettings {Indent = true, IndentChars = "  ", NewLineChars = "\r\n", NewLineHandling = NewLineHandling.Replace };
                 using (var stringWriter = new StringWriter())
@@ -51,7 +49,7 @@ namespace LeadsImporter.Lib.Cache
                     serializer.Serialize(xmlWriter, data);
                     var xml = stringWriter.ToString();
                     var fileName = $"{type}.xml";
-                    var fullPath = Path.Combine(_settings.TempCachePath, fileName);
+                    var fullPath = Path.Combine(_tempCachePath, fileName);
                     File.WriteAllText(fullPath, xml);
                 }
             }
@@ -71,7 +69,7 @@ namespace LeadsImporter.Lib.Cache
                 ReportData data = null;
                 var xmlSerializer = new XmlSerializer(typeof(ReportData));
                 var fileName = $"{type}.xml";
-                var fullPath = Path.Combine(_settings.TempCachePath, fileName);
+                var fullPath = Path.Combine(_tempCachePath, fileName);
                 var streamReader = new StreamReader(fullPath);
                 data = (ReportData)xmlSerializer.Deserialize(streamReader);
                 streamReader.Close();

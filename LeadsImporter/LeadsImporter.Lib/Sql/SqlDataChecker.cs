@@ -7,13 +7,11 @@ namespace LeadsImporter.Lib.Sql
 {
     public class SqlDataChecker
     {
-        private readonly ReportsSettings _reportsSettings;
         private readonly ReportDataManager _reportDataManager;
         private readonly ILogger _logger;
 
-        public SqlDataChecker(ReportsSettings reportsSettings, ReportDataManager reportDataManager, ILogger logger)
+        public SqlDataChecker(ReportDataManager reportDataManager, ILogger logger)
         {
-            _reportsSettings = reportsSettings;
             _reportDataManager = reportDataManager;
             _logger = logger;
         }
@@ -34,14 +32,10 @@ namespace LeadsImporter.Lib.Sql
                 {
                     foreach (var reportDataRow in reportData.Rows)
                     {
-                        var leadId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
-                        var customerId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
-                        var lenderId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
-                        var loanDate = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
+                        var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
+                        var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
+                        var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
+                        var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
 
                         //Is on the exceptions list?
                         if (exception.LeadId == leadId && exception.CustomerId == customerId && exception.CustomerId == customerId
@@ -78,22 +72,17 @@ namespace LeadsImporter.Lib.Sql
                 {
                     foreach (var reportDataRow in reportData.Rows)
                     {
-                        var leadId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
-                        var customerId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
-                        var lenderId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
-                        var loanDate = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
+                        var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
+                        var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
+                        var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
+                        var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
 
                         //Is duplicate?
                         if (data.LeadId != leadId || data.CustomerId != customerId || data.CustomerId != customerId ||
                             data.LenderId != lenderId || data.LoanDate != loanDate) continue;
 
-                        var type = _reportsSettings.GetTypeFromQueryId(reportData.QueryId);
-                        var leadCreated = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
+                        var type = _reportDataManager.GetReportType(reportData);
+                        var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
                         var exceptionDesc = $"{data.Id}";
                         duplicates.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "DUPLICATE", exceptionDesc));
                     }

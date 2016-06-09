@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using LeadsImporter.Lib.Log;
-using LeadsImporter.Lib.Setting;
 using static System.Int32;
 
 namespace LeadsImporter.Lib.Report
@@ -11,14 +10,13 @@ namespace LeadsImporter.Lib.Report
     public class ReportsSettings
     {
         private readonly ILogger _logger;
-        private readonly Settings _settings;
         private readonly List<ReportSettings> _all;
+        private readonly string _reportsSettingsPath = "ReportsSettings.txt";
 
-        public ReportsSettings(ILogger logger, Settings settings)
+        public ReportsSettings(ILogger logger)
         {
             _all = new List<ReportSettings>();
             _logger = logger;
-            _settings = settings;
         }
 
         #region READ ALL
@@ -28,7 +26,7 @@ namespace LeadsImporter.Lib.Report
             {
                 _logger.AddInfo("ReportsSettings >>> Read: Reading reports settings file...");
                 CreateIfNotExist();
-                var lines = File.ReadAllLines(_settings.ReportsSettingsFilePath);
+                var lines = File.ReadAllLines(_reportsSettingsPath);
                 for (var i = 0; i < lines.Length; i++)
                 {
                     _logger.AddInfo($"ReportsSettings >>> ReadAll: Reading line {i}...");
@@ -50,11 +48,11 @@ namespace LeadsImporter.Lib.Report
         #endregion
 
         #region GET TYPES
-        public IEnumerable<string> GetTypes()
+        public IEnumerable<string> GetReportTypes()
         {
             try
             {
-                _logger.AddInfo("ReportsSettings >>> GetTypes: Getting all report types...");
+                _logger.AddInfo("ReportsSettings >>> GetReportTypes: Getting all report types...");
                 return _all.GroupBy(p => p.Type).Select(g => g.First().Type).ToList();
             }
             catch (Exception ex)
@@ -104,7 +102,7 @@ namespace LeadsImporter.Lib.Report
             try
             {
                 _logger.AddInfo("ReportsSettings >>> GetReportSettings: Getting report settings for query id...");
-                return _all.First(reportSettings => reportSettings.AquariumQueryId == queryId);
+                return _all.First(reportSettings => reportSettings.QueryId == queryId);
             }
             catch (Exception ex)
             {
@@ -116,11 +114,11 @@ namespace LeadsImporter.Lib.Report
         #endregion
 
         #region GET TYPE FROM QUERY ID
-        public string GetTypeFromQueryId(int reportId)
+        public string GetReportType(int reportId)
         {
             try
             {
-                return _all.First(x => x.AquariumQueryId == reportId).Type;
+                return _all.First(x => x.QueryId == reportId).Type;
             }
             catch (Exception ex)
             {
@@ -136,10 +134,10 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                if (File.Exists(_settings.ReportsSettingsFilePath)) return;
-                _logger.AddInfo($"ReportsSettings >>> CreateIfNotExist: {_settings.ReportsSettingsFilePath} does't exist - creating new file...");
-                File.WriteAllLines(_settings.ReportsSettingsFilePath,
-                    new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,ProclaimDropPath" });
+                if (File.Exists(_reportsSettingsPath)) return;
+                _logger.AddInfo($"ReportsSettings >>> CreateIfNotExist: {_reportsSettingsPath} does't exist - creating new file...");
+                File.WriteAllLines(_reportsSettingsPath,
+                    new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,OutputPath" });
             }
             catch (Exception ex)
             {
@@ -168,14 +166,14 @@ namespace LeadsImporter.Lib.Report
                 return new ReportSettings()
                 {
                     Type = type,
-                    AquariumQueryId = Parse(aquariumQueryId),
+                    QueryId = Parse(aquariumQueryId),
                     ExecutionSequnece = Parse(executionSequnece),
                     LeadIdColumnName = leadIdColumnName,
                     CustomerIdColumnName = clientIdColumnName,
                     LenderIdColumnName = lenderIdColumnName,
                     LoanDateColumnName = dateOfCreditColumnName,
                     LeadCreatedColumnName = dateTimeLeadCreatedColumnName,
-                    ProclaimDropPath = proclaimDropPath
+                    OutputPath = proclaimDropPath
                 };
             }
             catch (Exception ex)

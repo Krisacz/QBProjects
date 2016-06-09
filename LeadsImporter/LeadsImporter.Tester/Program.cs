@@ -16,7 +16,7 @@ namespace LeadsImporter.Tester
         {
             switch (runType)
             {
-                case RunType.TopShelf:
+                case RunType.TopShelfLive:
                         #region TOP SHELF
                         HostFactory.Run(x =>
                         {
@@ -79,7 +79,7 @@ namespace LeadsImporter.Tester
 
         private enum RunType
         {
-            TopShelf,
+            TopShelfLive,
             ConsoleLive,
             ConsoleTest
         }

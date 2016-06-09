@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LeadsImporter.Lib.Log;
 
 namespace LeadsImporter.Lib.Report
@@ -42,8 +43,78 @@ namespace LeadsImporter.Lib.Report
         }
         #endregion
 
-        #region GET VALUE FOR COLUMN
-        public string GetValueForColumn(ReportData reportData, ReportDataRow row, string columnName)
+        #region GET VALUE
+        public string GetValueForLeadId(ReportData reportData, ReportDataRow reportDataRow)
+        {
+            try
+            {
+                return GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> GetValueForLeadId: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        public string GetValueForCustomerId(ReportData reportData, ReportDataRow reportDataRow)
+        {
+            try
+            {
+                return GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> GetValueForCustomerId: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        public string GetValueForLenderId(ReportData reportData, ReportDataRow reportDataRow)
+        {
+            try
+            {
+                return GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> GetValueForLenderId: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        public DateTime GetValueForLoanDate(ReportData reportData, ReportDataRow reportDataRow)
+        {
+            try
+            {
+                return DateTime.Parse(GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> GetValueForLoanDate: {ex.Message}");
+            }
+
+            return DateTime.MinValue;
+        }
+
+        public DateTime GetValueForLeadCreated(ReportData reportData, ReportDataRow reportDataRow)
+        {
+            try
+            {
+                return DateTime.Parse(GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> GetValueForLeadCreated: {ex.Message}");
+            }
+
+            return DateTime.MinValue;
+        }
+
+        private string GetValueForColumn(ReportData reportData, ReportDataRow row, string columnName)
         {
             try
             {
@@ -56,6 +127,50 @@ namespace LeadsImporter.Lib.Report
             }
 
             return null;
+        }
+        #endregion
+
+        #region GET REPORT TYPE
+        public string GetReportType(ReportData reportData)
+        {
+            try
+            {
+                return _reportsSettings.GetReportType(reportData.QueryId);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"ReportDataManager >>> GetReportType: {ex.Message}");
+            }
+
+            return null;
+        }
+        #endregion
+
+        #region GET REPORT TYPES
+        public IEnumerable<string> GetReportTypes()
+        {
+            return _reportsSettings.GetReportTypes();
+        }
+        #endregion
+
+        #region GET SEQUENCES COUNT FOR TYPE
+        public int? GetSequencesCountForType(string type)
+        {
+            return _reportsSettings.GetSequencesCountForType(type);
+        }
+        #endregion
+
+        #region GET REPORT QUERY ID
+        public int GetReportQueryId(string type, int sequence)
+        {
+            return _reportsSettings.GetReportSettings(type, sequence).QueryId;
+        }
+        #endregion
+
+        #region GET OUTPUT PATH
+        public string GetOutputPath(ReportData reportData)
+        {
+            return _reportsSettings.GetReportSettings(reportData.QueryId).OutputPath;
         }
         #endregion
 

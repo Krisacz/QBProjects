@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
-using LeadsImporter.Lib.Setting;
 using LeadsImporter.Lib.Sql;
 
 namespace LeadsImporter.Lib.Validation
@@ -13,17 +12,14 @@ namespace LeadsImporter.Lib.Validation
     public class Validator
     {
         private readonly ILogger _logger;
-        private readonly Settings _settings;
         private Validations _validations;
-        private readonly ReportsSettings _reportsSettings;
         private readonly ReportDataManager _reportDataManager;
         private readonly SqlDataUpdater _sqlDataUpdater;
-
-        public Validator(ILogger logger, Settings settings, ReportsSettings reportsSettings, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater)
+        private readonly string _validationFilesPath = @"Validations\\";
+        
+        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater)
         {
             _logger = logger;
-            _settings = settings;
-            _reportsSettings = reportsSettings;
             _reportDataManager = reportDataManager;
             _sqlDataUpdater = sqlDataUpdater;
         }
@@ -35,7 +31,7 @@ namespace LeadsImporter.Lib.Validation
             {
                 _logger.AddInfo("Validator >>> Read: Reading all validation files...");
                 CreateIfNotExist();
-                var allFiles = Directory.GetFiles(_settings.ValidationFilesPath);
+                var allFiles = Directory.GetFiles(_validationFilesPath);
                 var validationFiles = allFiles.Where(x => x.EndsWith("val"));
                 _validations = new Validations();
 
@@ -67,9 +63,9 @@ namespace LeadsImporter.Lib.Validation
         {
             try
             {
-                if (Directory.Exists(_settings.ValidationFilesPath)) return;
-                _logger.AddInfo($"Validator >>> CreateIfNotExist: {_settings.ValidationFilesPath} does't exist - creating new folder...");
-                Directory.CreateDirectory(_settings.ValidationFilesPath);
+                if (Directory.Exists(_validationFilesPath)) return;
+                _logger.AddInfo($"Validator >>> CreateIfNotExist: {_validationFilesPath} does't exist - creating new folder...");
+                Directory.CreateDirectory(_validationFilesPath);
                 var readMeStr = new List<string>
                 {
                     #region READ ME TEXT
@@ -123,7 +119,7 @@ namespace LeadsImporter.Lib.Validation
                     @"will contain value ""Yes"" or ""No""."
                     #endregion
                 };
-                File.WriteAllLines(Path.Combine(_settings.ValidationFilesPath, "READ_ME.txt"), readMeStr);
+                File.WriteAllLines(Path.Combine(_validationFilesPath, "READ_ME.txt"), readMeStr);
             }
             catch (Exception ex)
             {
@@ -168,17 +164,12 @@ namespace LeadsImporter.Lib.Validation
                         if (header != validation.ColumnName) continue;
                         var exception = Validate(reportDataRow.Data[index], validation);
                         if (exception == null) continue;
-                        var type = _reportsSettings.GetTypeFromQueryId(reportData.QueryId);
-                        var leadId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
-                        var customerId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
-                        var lenderId = _reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
-                        var loanDate = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
-                        var leadCreated = DateTime.Parse(_reportDataManager.GetValueForColumn(reportData, reportDataRow,
-                            _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
+                        var type = _reportDataManager.GetReportType(reportData);
+                        var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
+                        var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
+                        var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
+                        var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
+                        var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
                         var exceptionDesc = $"[{header}] " + exception;
                         exceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", exceptionDesc));
                         anyException = true;
