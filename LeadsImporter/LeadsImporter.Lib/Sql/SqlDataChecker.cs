@@ -65,7 +65,7 @@ namespace LeadsImporter.Lib.Sql
         #endregion
 
         #region GET NEW DUPLICATES
-        public IEnumerable<SqlDataExceptionObject> GetNewDuplicates(ReportData reportData, IEnumerable<SqlDataObject> allData)
+        public List<SqlDataExceptionObject> GetNewDuplicates(ReportData reportData, IEnumerable<SqlDataObject> allData)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace LeadsImporter.Lib.Sql
 
                         var type = _reportDataManager.GetReportType(reportData);
                         var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
-                        var exceptionDesc = $"{data.Id}";
+                        var exceptionDesc = $"LeadId[{data.LeadId}] Id[{data.Id}]";
                         duplicates.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "DUPLICATE", exceptionDesc));
                     }
                 }
@@ -96,6 +96,64 @@ namespace LeadsImporter.Lib.Sql
             catch (Exception ex)
             {
                 _logger.AddError($"SqlDataChecker >>> GetNewDuplicates: {ex.Message}");
+            }
+
+            return new List<SqlDataExceptionObject>();
+        }
+        #endregion
+
+        #region GET DUPLICATES IN NEW DATA SET
+        public ReportData GetDuplicatesInNewDataSet(ReportData reportData, List<SqlDataExceptionObject> duplicates)
+        {
+            try
+            {
+                var uniqueList = new List<ReportDataRow>();
+
+                foreach (var dataRow in reportData.Rows)
+                {
+                    var rowDuplicated = false;
+
+                    var leadId = _reportDataManager.GetValueForLeadId(reportData, dataRow);
+                    var customerId = _reportDataManager.GetValueForCustomerId(reportData, dataRow);
+                    var lenderId = _reportDataManager.GetValueForLenderId(reportData, dataRow);
+                    var loanDate = _reportDataManager.GetValueForLoanDate(reportData, dataRow);
+
+                    foreach (var uniqueRow in uniqueList)
+                    {
+                        var uniqueLeadId = _reportDataManager.GetValueForLeadId(reportData, uniqueRow);
+                        var uniqueCustomerId = _reportDataManager.GetValueForCustomerId(reportData, uniqueRow);
+                        var uniqueLenderId = _reportDataManager.GetValueForLenderId(reportData, uniqueRow);
+                        var uniqueLoanDate = _reportDataManager.GetValueForLoanDate(reportData, uniqueRow);
+
+                        rowDuplicated = leadId == uniqueLeadId && customerId == uniqueCustomerId &&
+                                            lenderId == uniqueLenderId && loanDate == uniqueLoanDate;
+
+                        if(rowDuplicated) break;
+                    }
+
+                    if (rowDuplicated)
+                    {
+                        var type = _reportDataManager.GetReportType(reportData);
+                        var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, dataRow);
+                        var exceptionDesc = $"LeadId[{leadId}]";
+                        duplicates.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "DUPLICATE", exceptionDesc));
+                    }
+                    else
+                    {
+                        uniqueList.Add(dataRow);
+                    }
+                }
+                
+                return new ReportData()
+                {
+                    QueryId = reportData.QueryId,
+                    Headers = reportData.Headers,
+                    Rows = uniqueList
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"SqlDataChecker >>> GetDuplicatesInNewDataSet: {ex.Message}");
             }
 
             return null;

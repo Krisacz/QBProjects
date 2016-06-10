@@ -133,6 +133,7 @@ namespace LeadsImporter.Lib.Validation
         {
             try
             {
+                //TODO !! Remove existing rows (in sql) from whole data set (from Aquarium) !!
                 RemoveIllegalCharacters(reportData);
                 var validations = _validations.GetAll();
                 var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };

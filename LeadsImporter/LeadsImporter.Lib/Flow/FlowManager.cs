@@ -16,18 +16,18 @@ namespace LeadsImporter.Lib.Flow
         private readonly IDataAccessor _dataAccessor;
         private readonly SqlManager _sqlManager;
         private readonly ReportDataManager _reportDataManager;
-        private readonly SqlDataChecker _slqDataChecker;
+        private readonly SqlDataChecker _sqlDataChecker;
         private readonly SqlDataUpdater _sqlDataUpdater;
         private readonly Validator _validator;
         private readonly ILogger _logger;
 
         public FlowManager(ICache cache, IDataAccessor dataAccessor, SqlManager sqlManager, 
-            ReportDataManager reportDataManager, SqlDataChecker slqDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator, ILogger logger)
+            ReportDataManager reportDataManager, SqlDataChecker sqlDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator, ILogger logger)
         {
             _cache = cache;
             _dataAccessor = dataAccessor;
             _sqlManager = sqlManager;
-            _slqDataChecker = slqDataChecker;
+            _sqlDataChecker = sqlDataChecker;
             _reportDataManager = reportDataManager;
             _sqlDataUpdater = sqlDataUpdater;
             _validator = validator;
@@ -119,14 +119,14 @@ namespace LeadsImporter.Lib.Flow
         {
             try
             {
-                //TODO here or somewhere - after removing exceptions and duplicates final  data set needs to be checked for duplicates within itself!
                 var reportData = _cache.Get(type);
-                var reportDataWithoutExceptions = _slqDataChecker.RemoveExceptions(reportData, exceptions);
-                var duplicates = _slqDataChecker.GetNewDuplicates(reportDataWithoutExceptions, allData);
+                var reportDataWithoutExceptions = _sqlDataChecker.RemoveExceptions(reportData, exceptions);
+                var duplicates = _sqlDataChecker.GetNewDuplicates(reportDataWithoutExceptions, allData);
+                var reportDataWithoutDuplicatesAndExceptions = _sqlDataChecker.GetDuplicatesInNewDataSet(reportDataWithoutExceptions, duplicates);
                 _sqlDataUpdater.SubmitNewExceptions(duplicates);
-                var newData = GetReportDataAsSqlDataObject(reportDataWithoutExceptions);
+                var newData = GetReportDataAsSqlDataObject(reportDataWithoutDuplicatesAndExceptions);
                 _sqlDataUpdater.SubmitNewData(newData);
-                _cache.Store(type, reportDataWithoutExceptions);
+                _cache.Store(type, reportDataWithoutDuplicatesAndExceptions);
             }
             catch (Exception ex)
             {

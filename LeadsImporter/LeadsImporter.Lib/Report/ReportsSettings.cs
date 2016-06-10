@@ -29,7 +29,7 @@ namespace LeadsImporter.Lib.Report
                 var lines = File.ReadAllLines(_reportsSettingsPath);
                 for (var i = 0; i < lines.Length; i++)
                 {
-                    _logger.AddInfo($"ReportsSettings >>> ReadAll: Reading line {i}...");
+                    _logger.AddDetailedLog($"ReportsSettings >>> ReadAll: Reading line {i}...");
                     var line = lines[i];
                     if (string.IsNullOrWhiteSpace(line)) continue; //skip empty lines
                     if (i == 0) continue; //skip header
@@ -52,7 +52,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                _logger.AddInfo("ReportsSettings >>> GetReportTypes: Getting all report types...");
+                _logger.AddDetailedLog("ReportsSettings >>> GetReportTypes: Getting all report types...");
                 return _all.GroupBy(p => p.Type).Select(g => g.First().Type).ToList();
             }
             catch (Exception ex)
@@ -69,7 +69,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                _logger.AddInfo("ReportsSettings >>> GetSequencesCountForType: Getting sequences count per type...");
+                _logger.AddDetailedLog("ReportsSettings >>> GetSequencesCountForType: Getting sequences count per type...");
                 return _all.Count(reportSettings => reportSettings.Type == type);
             }
             catch (Exception ex)
@@ -86,7 +86,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                _logger.AddInfo("ReportsSettings >>> GetReportSettings: Getting report settings for type/sequence...");
+                _logger.AddDetailedLog("ReportsSettings >>> GetReportSettings: Getting report settings for type/sequence...");
                 return _all.First(reportSettings => reportSettings.Type == type && reportSettings.ExecutionSequnece == sequence);
             }
             catch (Exception ex)
@@ -101,7 +101,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                _logger.AddInfo("ReportsSettings >>> GetReportSettings: Getting report settings for query id...");
+                _logger.AddDetailedLog("ReportsSettings >>> GetReportSettings: Getting report settings for query id...");
                 return _all.First(reportSettings => reportSettings.QueryId == queryId);
             }
             catch (Exception ex)
@@ -135,7 +135,7 @@ namespace LeadsImporter.Lib.Report
             try
             {
                 if (File.Exists(_reportsSettingsPath)) return;
-                _logger.AddInfo($"ReportsSettings >>> CreateIfNotExist: {_reportsSettingsPath} does't exist - creating new file...");
+                _logger.AddDetailedLog($"ReportsSettings >>> CreateIfNotExist: {_reportsSettingsPath} does't exist - creating new file...");
                 File.WriteAllLines(_reportsSettingsPath,
                     new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,OutputPath" });
             }
@@ -149,7 +149,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                _logger.AddInfo($"ReportsSettings >>> MapReportSettings: Mapping line {i}...");
+                _logger.AddDetailedLog($"ReportsSettings >>> MapReportSettings: Mapping line {i}...");
 
                 var parts = line.Split(',');
 

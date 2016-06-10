@@ -21,6 +21,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
+                _logger.AddDetailedLog($"ReportDataManager >>> Join: Joining report {joinReportData.QueryId} to {reportData.QueryId}");
                 for (var i = 0; i < joinReportData.Rows.Count; i++)
                 {
                     var joinReportDataRow = joinReportData.Rows[i];
@@ -31,7 +32,7 @@ namespace LeadsImporter.Lib.Report
                         var joinReportDataValue = joinReportDataRow.Data[index];
                         var existingReportDataRowIndex = GetExistingReportDataRowIndex(reportData, joinReportData, i);
                         if (existingReportDataRowIndex == null) continue;
-                        AddHeaderIfNotExist(reportData, joinReportDataHeader);
+                        AddHeader(reportData, joinReportDataHeader);
                         reportData.Rows[(int)existingReportDataRowIndex].Data.Add(joinReportDataValue);
                     }
                 }
@@ -244,7 +245,7 @@ namespace LeadsImporter.Lib.Report
                    || reportSettings.LeadCreatedColumnName == header;
         }
 
-        private void AddHeaderIfNotExist(ReportData reportData, string newHeader)
+        private void AddHeader(ReportData reportData, string newHeader)
         {
             try
             {

@@ -307,7 +307,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> GetColumns: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReportHeaders: {ex.Message}");
             }
 
             return null;

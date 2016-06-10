@@ -16,11 +16,11 @@ namespace LeadsImporter.Lib.AppController
 
         public TestConsoleAppController()
         {
-            var logger = new ConsoleLogger() {EnableDetailedLog = true};
+            var logger = new ConsoleLogger() {EnableDetailedLog = false};
             var settings = SettingsReader.Read(logger);
             var reportsSettings = new ReportsSettings(logger).ReadAll();
             var reportDataManager = new ReportDataManager(logger, reportsSettings);
-            var dataAccessor = new TestDataAccessor();
+            var dataAccessor = new TestDataAccessor(logger);
             var sqlManager = new SqlManager(logger, settings);
             var sqlDataChecker = new SqlDataChecker(reportDataManager, logger);
             var sqlDataUpdater = new SqlDataUpdater(sqlManager, logger);
