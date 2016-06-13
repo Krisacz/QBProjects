@@ -16,12 +16,14 @@ namespace LeadsImporter.Lib.Validation
         private readonly ReportDataManager _reportDataManager;
         private readonly SqlDataUpdater _sqlDataUpdater;
         private readonly string _validationFilesPath = @"Validations\\";
-        
-        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater)
+        private readonly SqlDataChecker _sqlDataChecker;
+
+        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater, SqlDataChecker sqlDataChecker)
         {
             _logger = logger;
             _reportDataManager = reportDataManager;
             _sqlDataUpdater = sqlDataUpdater;
+            _sqlDataChecker = sqlDataChecker;
         }
 
         #region READ ALL VALIDATION FILES
@@ -129,16 +131,21 @@ namespace LeadsImporter.Lib.Validation
         #endregion
         
         #region VALIDATE REPORT
-        public ReportData ValidateReport(ReportData reportData)
+        public ReportData ValidateReport(ReportData reportData, List<SqlDataExceptionObject> sqlExceptions)
         {
             try
             {
-                //TODO !! Remove existing rows (in sql) from whole data set (from Aquarium) !!
                 RemoveIllegalCharacters(reportData);
                 var validations = _validations.GetAll();
                 var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
                 var exceptions = new List<SqlDataExceptionObject>();
-                foreach (var reportDataRow in reportData.Rows) ValidateRow(reportData, reportDataRow, validations, exceptions, correctedReportData);
+                foreach (var reportDataRow in reportData.Rows)
+                {
+                    if(!_sqlDataChecker.InExceptionsList(reportData, reportDataRow, sqlExceptions))
+                    {
+                        ValidateRow(reportData, reportDataRow, validations, exceptions, correctedReportData);
+                    }
+                }
                 _sqlDataUpdater.SubmitNewExceptions(exceptions);
                 return correctedReportData;
             }
@@ -211,9 +218,10 @@ namespace LeadsImporter.Lib.Validation
         {
             //Check if string can be empty
             if (string.IsNullOrWhiteSpace(value) && !canBeEmpty) return "STRING can not be empty.";
+            if (string.IsNullOrWhiteSpace(value) && canBeEmpty) return null;
 
             //Check if we have minimum len
-            if (parameters.Count > 0)
+            if (parameters.Count > 0 && !string.IsNullOrWhiteSpace(parameters[0]))
             {
                 var minimumLen = int.Parse(parameters[0]);
                 if (string.IsNullOrEmpty(value) &&  minimumLen > 0) return $"STRING must be at least {minimumLen} length.";
@@ -221,7 +229,7 @@ namespace LeadsImporter.Lib.Validation
             }
 
             //Check if we have maximum len
-            if (parameters.Count > 1)
+            if (parameters.Count > 1 && !string.IsNullOrWhiteSpace(parameters[1]))
             {
                 var maximumLen = int.Parse(parameters[1]);
                 if (!string.IsNullOrEmpty(value) && value.Length > maximumLen) return $"STRING must be at not longer than {maximumLen}.";
@@ -234,6 +242,7 @@ namespace LeadsImporter.Lib.Validation
         {
             //Check if string can be empty
             if (string.IsNullOrWhiteSpace(value) && !canBeEmpty) return "FIXED can not be empty.";
+            if (string.IsNullOrWhiteSpace(value) && canBeEmpty) return null;
 
             //Check if content is one of the fixed values
             var correct = false;
@@ -251,27 +260,28 @@ namespace LeadsImporter.Lib.Validation
         {
             //Check if string can be empty
             if (string.IsNullOrWhiteSpace(value) && !canBeEmpty) return "DATE can not be empty.";
+            if (string.IsNullOrWhiteSpace(value) && canBeEmpty) return null;
 
             //Try to parse date
             DateTime date;
             if(!DateTime.TryParse(value, out date)) return "DATE could not be parsed.";
 
             //Check if we have minimum date
-            if (parameters.Count > 0)
+            if (parameters.Count > 0 && !string.IsNullOrWhiteSpace(parameters[0]))
             {
                 var minimumDate = DateTime.Parse(parameters[0]);
                 if (date < minimumDate) return $"DATE can not be earlier than {minimumDate}.";
             }
 
             //Check if we have minimum date
-            if (parameters.Count > 1)
+            if (parameters.Count > 1 && !string.IsNullOrWhiteSpace(parameters[1]))
             {
                 var maximumDate = DateTime.Parse(parameters[1]);
                 if (date > maximumDate) return $"DATE can not be later than {maximumDate}.";
             }
 
             //Check if date is at least X years from today
-            if (parameters.Count > 2)
+            if (parameters.Count > 2 && !string.IsNullOrWhiteSpace(parameters[2]))
             {
                 var years = int.Parse(parameters[2]);
                 var dateCheck = date.AddYears(years);
@@ -286,20 +296,21 @@ namespace LeadsImporter.Lib.Validation
         {
             //Check if string can be empty
             if (string.IsNullOrWhiteSpace(value) && !canBeEmpty) return "VALUE can not be empty.";
+            if (string.IsNullOrWhiteSpace(value) && canBeEmpty) return null;
 
             //Try to parse date
             int v;
             if (!int.TryParse(value, out v)) return "VALUE could not be parsed.";
 
             //Check if we have minimum value
-            if (parameters.Count > 0)
+            if (parameters.Count > 0 && !string.IsNullOrWhiteSpace(parameters[0]))
             {
                 var minimumValue = int.Parse(parameters[0]);
                 if (v < minimumValue) return $"VALUE can not be less than {minimumValue}.";
             }
 
             //Check if we have maximum value
-            if (parameters.Count > 1)
+            if (parameters.Count > 1 && !string.IsNullOrWhiteSpace(parameters[1]))
             {
                 var maximumValue = int.Parse(parameters[1]);
                 if (v > maximumValue) return $"VALUE can not be more than {maximumValue}.";
