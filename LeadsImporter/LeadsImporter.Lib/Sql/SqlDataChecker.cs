@@ -21,39 +21,45 @@ namespace LeadsImporter.Lib.Sql
         {
             try
             {
-                var reportDataWithoutExceptions = new ReportData()
+                //If there are no exceptions - all rows as valid
+                if (exceptions.Count == 0)
                 {
-                    QueryId = reportData.QueryId,
-                    Headers = reportData.Headers,
-                    Rows = new List<ReportDataRow>()
-                };
+                    return reportData;
+                }
+                else
+                {
+                    var reportDataWithoutExceptions = new ReportData()
+                    {
+                        QueryId = reportData.QueryId,
+                        Headers = reportData.Headers,
+                        Rows = new List<ReportDataRow>()
+                    };
 
-                foreach (var exception in exceptions)
-                {
                     foreach (var reportDataRow in reportData.Rows)
                     {
                         var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
                         var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
                         var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
                         var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
+                        var exceptionLead = false;
 
-                        //Is on the exceptions list?
-                        if (exception.LeadId == leadId && exception.CustomerId == customerId && exception.CustomerId == customerId
-                            && exception.LenderId == lenderId && exception.LoanDate == loanDate)
+                        foreach (var exception in exceptions)
                         {
-                            //Lead is in exceptions - do not add it to output
+                            //Is on the exceptions list?
+                            if (exception.LeadId == leadId && exception.CustomerId == customerId && exception.LenderId == lenderId && exception.LoanDate == loanDate)
+                            {
+                                //Lead is in exceptions
+                                exceptionLead = true;
+                                break;
+                            }
                         }
-                        else
-                        {
-                            reportDataWithoutExceptions.Rows.Add(reportDataRow);
-                        }
+
+                        //Lead not on the exception list
+                        if (!exceptionLead) reportDataWithoutExceptions.Rows.Add(reportDataRow);
                     }
+
+                    return reportDataWithoutExceptions;
                 }
-
-                //If there are no exceptions - assume all rows as valid
-                if(exceptions.Count == 0) reportDataWithoutExceptions.Rows.AddRange(reportData.Rows);
-
-                return reportDataWithoutExceptions;
             }
             catch (Exception ex)
             {
@@ -63,47 +69,74 @@ namespace LeadsImporter.Lib.Sql
             return null;
         }
         #endregion
-
-        #region GET NEW DUPLICATES
-        public List<SqlDataExceptionObject> GetNewDuplicates(ReportData reportData, IEnumerable<SqlDataObject> allData)
+        
+        #region REMOVE EXISTING DATA
+        public ReportData RemoveExistingData(ReportData reportData, List<SqlDataObject> allData, List<SqlDataExceptionObject> duplicates)
         {
             try
             {
-                var duplicates = new List<SqlDataExceptionObject>();
-
-                foreach (var data in allData)
+                //If there are no exceptions - assume all rows as valid
+                if (allData.Count == 0)
                 {
+                    return reportData;
+                }
+                else
+                {
+                    var returnReportData = new ReportData()
+                    {
+                        QueryId = reportData.QueryId,
+                        Headers = reportData.Headers,
+                        Rows = new List<ReportDataRow>()
+                    };
+
                     foreach (var reportDataRow in reportData.Rows)
                     {
                         var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
                         var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
                         var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
                         var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
+                        var processed = false;
 
-                        //Is duplicate?
-                        if (data.LeadId != leadId || data.CustomerId != customerId || data.CustomerId != customerId ||
-                            data.LenderId != lenderId || data.LoanDate != loanDate) continue;
+                        foreach (var data in allData)
+                        {
+                            //Already exist?
+                            if (data.LeadId == leadId && data.CustomerId == customerId && data.LenderId == lenderId && data.LoanDate == loanDate)
+                            {
+                                //Lead already exist - ignore it
+                                processed = true;
+                                break;
+                            }
 
-                        var type = _reportDataManager.GetReportType(reportData);
-                        var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
-                        var exceptionDesc = $"LeadId[{data.LeadId}] Id[{data.Id}]";
-                        duplicates.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "DUPLICATE", exceptionDesc));
+                            //Is Duplicate?
+                            if (data.LeadId != leadId && data.CustomerId == customerId && data.LenderId == lenderId && data.LoanDate == loanDate)
+                            {
+                                var type = _reportDataManager.GetReportType(reportData);
+                                var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
+                                var exceptionDesc = $"Id[{data.Id}]";
+                                duplicates.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "DUPLICATE", exceptionDesc));
+                                processed = true;
+                                break;
+                            }
+                        }
+
+                        //New row of data
+                        if (!processed) returnReportData.Rows.Add(reportDataRow);
+
                     }
+                    return returnReportData;
                 }
-
-                return duplicates;
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlDataChecker >>> GetNewDuplicates: {ex.Message}");
+                _logger.AddError($"SqlDataChecker >>> RemoveExisitngData: {ex.Message}");
             }
-
-            return new List<SqlDataExceptionObject>();
+            
+            return null;
         }
         #endregion
 
-        #region GET DUPLICATES IN NEW DATA SET
-        public ReportData GetDuplicatesInNewDataSet(ReportData reportData, List<SqlDataExceptionObject> duplicates)
+        #region REMOVE DUPLICATES
+        public ReportData RemoveDuplicates(ReportData reportData, List<SqlDataExceptionObject> duplicates)
         {
             try
             {
@@ -113,27 +146,24 @@ namespace LeadsImporter.Lib.Sql
                 {
                     var rowDuplicated = false;
 
-                    var leadId = _reportDataManager.GetValueForLeadId(reportData, dataRow);
                     var customerId = _reportDataManager.GetValueForCustomerId(reportData, dataRow);
                     var lenderId = _reportDataManager.GetValueForLenderId(reportData, dataRow);
                     var loanDate = _reportDataManager.GetValueForLoanDate(reportData, dataRow);
 
                     foreach (var uniqueRow in uniqueList)
                     {
-                        var uniqueLeadId = _reportDataManager.GetValueForLeadId(reportData, uniqueRow);
                         var uniqueCustomerId = _reportDataManager.GetValueForCustomerId(reportData, uniqueRow);
                         var uniqueLenderId = _reportDataManager.GetValueForLenderId(reportData, uniqueRow);
                         var uniqueLoanDate = _reportDataManager.GetValueForLoanDate(reportData, uniqueRow);
 
-                        rowDuplicated = leadId == uniqueLeadId && customerId == uniqueCustomerId &&
-                                            lenderId == uniqueLenderId && loanDate == uniqueLoanDate;
-
-                        if(rowDuplicated) break;
+                        rowDuplicated = customerId == uniqueCustomerId && lenderId == uniqueLenderId && loanDate == uniqueLoanDate;
+                        if (rowDuplicated) break;
                     }
 
                     if (rowDuplicated)
                     {
                         var type = _reportDataManager.GetReportType(reportData);
+                        var leadId = _reportDataManager.GetValueForLeadId(reportData, dataRow);
                         var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, dataRow);
                         var exceptionDesc = $"LeadId[{leadId}]";
                         duplicates.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "DUPLICATE", exceptionDesc));
@@ -143,7 +173,7 @@ namespace LeadsImporter.Lib.Sql
                         uniqueList.Add(dataRow);
                     }
                 }
-                
+
                 return new ReportData()
                 {
                     QueryId = reportData.QueryId,
@@ -157,6 +187,36 @@ namespace LeadsImporter.Lib.Sql
             }
 
             return null;
+        }
+        #endregion
+
+        #region IN EXCEPTION LIST
+        public bool InExceptionsList(ReportData reportData, ReportDataRow reportDataRow, List<SqlDataExceptionObject> exceptions)
+        {
+            try
+            {
+                foreach (var exceptionObject in exceptions)
+                {
+                    var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
+                    var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
+                    var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
+                    var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
+
+                    if (leadId == exceptionObject.LeadId && customerId == exceptionObject.CustomerId
+                        && lenderId == exceptionObject.LenderId && loanDate == exceptionObject.LoanDate)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"SqlDataChecker >>> InExceptionsList: {ex.Message}");
+            }
+
+            return false;
         }
         #endregion
     }
