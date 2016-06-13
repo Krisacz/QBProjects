@@ -21,6 +21,9 @@ namespace LeadsImporter.Lib.Flow
         private readonly Validator _validator;
         private readonly ILogger _logger;
 
+        private List<SqlDataExceptionObject> _sqlExceptions;
+        private List<SqlDataObject> _allData;
+
         public FlowManager(ICache cache, IDataAccessor dataAccessor, SqlManager sqlManager, 
             ReportDataManager reportDataManager, SqlDataChecker sqlDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator, ILogger logger)
         {
@@ -40,6 +43,8 @@ namespace LeadsImporter.Lib.Flow
             try
             {
                 _cache.Clear();
+                _sqlExceptions = _sqlManager.GetAllExceptions();
+                _allData = _sqlManager.GetAllData();
             }
             catch (Exception ex)
             {
@@ -80,13 +85,13 @@ namespace LeadsImporter.Lib.Flow
                     if (s == 1)
                     {
                         var unvalidatedFirstReportData = _dataAccessor.GetReportData(queryId);
-                        firstReportData = _validator.ValidateReport(unvalidatedFirstReportData);
+                        firstReportData = _validator.ValidateReport(unvalidatedFirstReportData, _sqlExceptions);
                     }
                     //any sequential
                     else
                     {
                         var unvalidatedReportData = _dataAccessor.GetReportData(queryId);
-                        var reportData = _validator.ValidateReport(unvalidatedReportData);
+                        var reportData = _validator.ValidateReport(unvalidatedReportData, _sqlExceptions);
                         _reportDataManager.Join(firstReportData, reportData);
                     }
                 }
@@ -104,10 +109,8 @@ namespace LeadsImporter.Lib.Flow
         {
             try
             {
-                var exceptions = _sqlManager.GetAllExceptions();
-                var allData = _sqlManager.GetAllData();
                 var types = _reportDataManager.GetReportTypes();
-                foreach (var type in types) CheckData(type, exceptions, allData);
+                foreach (var type in types) CheckData(type);
             }
             catch (Exception ex)
             {
@@ -115,49 +118,26 @@ namespace LeadsImporter.Lib.Flow
             }
         }
 
-        private void CheckData(string type, List<SqlDataExceptionObject> exceptions, IEnumerable<SqlDataObject> allData)
+        private void CheckData(string type)
         {
             try
             {
                 var reportData = _cache.Get(type);
-                var reportDataWithoutExceptions = _sqlDataChecker.RemoveExceptions(reportData, exceptions);
-                var duplicates = _sqlDataChecker.GetNewDuplicates(reportDataWithoutExceptions, allData);
-                var reportDataWithoutDuplicatesAndExceptions = _sqlDataChecker.GetDuplicatesInNewDataSet(reportDataWithoutExceptions, duplicates);
+                var duplicates = new List<SqlDataExceptionObject>();
+                var reportDataWithoutExceptions = _sqlDataChecker.RemoveExceptions(reportData, _sqlExceptions);
+                var newReportData = _sqlDataChecker.RemoveExistingData(reportDataWithoutExceptions, _allData, duplicates);
+                var newReportDataWithoutDuplicates = _sqlDataChecker.RemoveDuplicates(newReportData, duplicates);
+                
                 _sqlDataUpdater.SubmitNewExceptions(duplicates);
-                var newData = GetReportDataAsSqlDataObject(reportDataWithoutDuplicatesAndExceptions);
-                _sqlDataUpdater.SubmitNewData(newData);
-                _cache.Store(type, reportDataWithoutDuplicatesAndExceptions);
+                var newSqlData = SqlConverter.GetReportDataAsSqlDataObject(newReportDataWithoutDuplicates, _reportDataManager, _logger);
+                _sqlDataUpdater.SubmitNewData(newSqlData);
+
+                _cache.Store(type, newReportDataWithoutDuplicates);
             }
             catch (Exception ex)
             {
                 _logger.AddError($"FlowManager >>> CheckData[{type}]: {ex.Message}");
             }
-        }
-
-        private IEnumerable<SqlDataObject> GetReportDataAsSqlDataObject(ReportData reportData)
-        {
-            try
-            {
-                var list = new List<SqlDataObject>();
-                foreach (var reportDataRow in reportData.Rows)
-                {
-                    var type = _reportDataManager.GetReportType(reportData);
-                    var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
-                    var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
-                    var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
-                    var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
-                    var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
-
-                    list.Add(new SqlDataObject(type, leadId, customerId, lenderId, loanDate, leadCreated));
-                }
-                return list;
-            }
-            catch (Exception ex)
-            {
-                _logger.AddError($"FlowManager >>> GetReportDataAsSqlDataObject: {ex.Message}");
-            }
-
-            return null;
         }
         #endregion
 
@@ -184,12 +164,14 @@ namespace LeadsImporter.Lib.Flow
             {
                 var reportData = _cache.Get(type);
                 var csv = new List<string>();
+                if(reportData.Rows.Count == 0) return;
+
                 foreach (var reportDataRow in reportData.Rows)
                 {
                     var line = string.Join(",", reportDataRow.Data);
                     csv.Add(line);
                 }
-                csv.Add(string.Empty);
+                //csv.Add(string.Empty);
 
                 var fileName = $"import_{DateTime.Now.ToString("ddMMyyyy_HHmmss")}.csv";
                 var pathRoot = _reportDataManager.GetOutputPath(reportData);
