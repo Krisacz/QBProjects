@@ -2,4 +2,4 @@ Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdCo
 URSC,38379,1,LeadID,CustomerID,Lender ID,Date of Loan,WhenCreate,C:\FTP\Aquarium\URSC\
 URSC,38380,2,LeadID,CustomerID,Lender ID,Date of Loan,WhenCreate,C:\FTP\Aquarium\URSC\
 RPPI,38375,1,LeadID,CustomerID,Lender ID,Date of Credit,Date Executed,C:\FTP\Aquarium\RPPI\
-RPPI,38376,1,LeadID,CustomerID,Lender ID,Date of Credit,Date Executed,C:\FTP\Aquarium\RPPI\
+RPPI,38376,2,LeadID,CustomerID,Lender ID,Date of Credit,Date Executed,C:\FTP\Aquarium\RPPI\

@@ -70,7 +70,7 @@ namespace LeadsImporter.Lib.DataAccessor
                 _logger.AddInfo($"TestDataAccessor >>> GetUrscReport2: Getting test data for URSC...");
                 return new ReportData()
                 {
-                    QueryId = 38379,
+                    QueryId = 38380,
                     Headers = new List<string>() { "LeadID", "CustomerID", "Lender ID", "Date of Loan", "WhenCreate", "AdditionalData1", "AdditionalData2", "AdditionalData3" },
                     Rows = new List<ReportDataRow>()
                     {
@@ -122,7 +122,7 @@ namespace LeadsImporter.Lib.DataAccessor
                 _logger.AddInfo($"TestDataAccessor >>> GetUrscReport2: Getting test data for RPPI...");
                 return new ReportData()
                 {
-                    QueryId = 38375,
+                    QueryId = 38376,
                     Headers = new List<string>() { "LeadID", "CustomerID", "Lender ID", "Date of Credit", "Date Executed", "AdditionalDataA", "AdditionalDataB", "AdditionalDataC" },
                     Rows = new List<ReportDataRow>()
                     {
