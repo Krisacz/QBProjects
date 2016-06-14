@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
 using LeadsImporter.Lib.Sql;
@@ -17,13 +16,15 @@ namespace LeadsImporter.Lib.Validation
         private readonly SqlDataUpdater _sqlDataUpdater;
         private readonly string _validationFilesPath = @"Validations\\";
         private readonly SqlDataChecker _sqlDataChecker;
+        private readonly CharactersValidator _charactersValidator;
 
-        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater, SqlDataChecker sqlDataChecker)
+        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater, SqlDataChecker sqlDataChecker, CharactersValidator charactersValidator)
         {
             _logger = logger;
             _reportDataManager = reportDataManager;
             _sqlDataUpdater = sqlDataUpdater;
             _sqlDataChecker = sqlDataChecker;
+            _charactersValidator = charactersValidator;
         }
 
         #region READ ALL VALIDATION FILES
@@ -135,7 +136,7 @@ namespace LeadsImporter.Lib.Validation
         {
             try
             {
-                RemoveIllegalCharacters(reportData);
+                _charactersValidator.Remove(reportData);
                 var validations = _validations.GetAll();
                 var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
                 var exceptions = new List<SqlDataExceptionObject>();
@@ -317,26 +318,6 @@ namespace LeadsImporter.Lib.Validation
             }
 
             return null;
-        }
-
-        private void RemoveIllegalCharacters(ReportData reportData)
-        {
-            try
-            {
-                var illegalCharacters = new Regex(@"[,£]");
-                foreach (var reportDataRow in reportData.Rows)
-                {
-                    for (var index = 0; index < reportDataRow.Data.Count; index++)
-                    {
-                        var str = reportDataRow.Data[index];
-                        reportDataRow.Data[index] = illegalCharacters.Replace(str, "");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.AddError($"Validator >>> ReadAll: {ex.Message}");
-            }
         }
         #endregion
 

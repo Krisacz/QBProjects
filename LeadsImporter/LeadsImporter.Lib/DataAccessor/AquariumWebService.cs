@@ -69,13 +69,11 @@ namespace LeadsImporter.Lib.DataAccessor
         {
             try
             {
-                const string url = "https://aqnet.aquarium-software.com/AquariumSDK/UserManagement.asmx";
-                const string action = "https://www.aquarium-software.com/AquariumSDK/Logon";
                 var username = _settings.AquariumUsername;
                 var password = _settings.AquariumPassword;
                 var xml = LogonXml(username, password);
                 var soapEnvelopeXml = CreateSoapEnvelope(xml);
-                var webRequest = CreateWebRequest(url, action);
+                var webRequest = CreateWebRequest(_settings.AquariumLogonUrl, _settings.AquariumLogonAction);
                 InsertSoapEnvelopeIntoWebRequest(soapEnvelopeXml, webRequest);
                 var asyncResult = webRequest.BeginGetResponse(null, null);
                 asyncResult.AsyncWaitHandle.WaitOne();
@@ -98,49 +96,14 @@ namespace LeadsImporter.Lib.DataAccessor
             return null;
         }
 
-        //Not in use at the moment - gives list of existing reports - might be useful in the future
-        private string CallGetReports(string sessionKey, string queryId)
-        {
-            try
-            {
-                const string url = "https://aqnet.aquarium-software.com/AquariumSDK/ReportManagement.asmx";
-                const string action = "https://www.aquarium-software.com/AquariumSDK/RunReport";
-                var username = _settings.AquariumUsername;
-                var xml = GetReportXml(username, sessionKey, queryId);
-                var soapEnvelopeXml = CreateSoapEnvelope(xml);
-                var webRequest = CreateWebRequest(url, action);
-                InsertSoapEnvelopeIntoWebRequest(soapEnvelopeXml, webRequest);
-                var asyncResult = webRequest.BeginGetResponse(null, null);
-                asyncResult.AsyncWaitHandle.WaitOne();
-                string soapResult;
-                using (var webResponse = webRequest.EndGetResponse(asyncResult))
-                {
-                    using (var rd = new StreamReader(webResponse.GetResponseStream()))
-                    {
-                        soapResult = rd.ReadToEnd();
-                    }
-                }
-
-                return soapResult;
-            }
-            catch (Exception ex)
-            {
-                _logger.AddError($"AquariumWebService >>> CallGetReports: {ex.Message}");
-            }
-
-            return null;
-        }
-
         private string CallRunReport(string sessionKey, string queryId)
         {
             try
             {
-                const string url = "https://aqnet.aquarium-software.com/AquariumSDK/ReportManagement.asmx";
-                const string action = "https://www.aquarium-software.com/AquariumSDK/RunReport";
                 var username = _settings.AquariumUsername;
                 var xml = RunReportXml(username, sessionKey, queryId);
                 var soapEnvelopeXml = CreateSoapEnvelope(xml);
-                var webRequest = CreateWebRequest(url, action);
+                var webRequest = CreateWebRequest(_settings.AquariumRunReportUrl, _settings.AquariumRunReportAction);
                 InsertSoapEnvelopeIntoWebRequest(soapEnvelopeXml, webRequest);
                 var asyncResult = webRequest.BeginGetResponse(null, null);
                 asyncResult.AsyncWaitHandle.WaitOne();

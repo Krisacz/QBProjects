@@ -1,5 +1,8 @@
 ﻿using System;
 using LeadsImporter.Lib.AppController;
+using LeadsImporter.Lib.DataAccessor;
+using LeadsImporter.Lib.Log;
+using LeadsImporter.Lib.Setting;
 using Topshelf;
 
 namespace LeadsImporter.Tester
@@ -10,12 +13,14 @@ namespace LeadsImporter.Tester
         {
             Run(RunType.ConsoleTest);
 
-            //var consoleLogger = new ConsoleLogger(); 
-            //var settings = SettingsReader.Read(consoleLogger);
-            //var da = new AquariumWebService(consoleLogger, settings);
-            //var data = da.GetReportData(38375);
-            //var stop = 1;
-            //Console.ReadKey();
+            /*
+            var consoleLogger = new ConsoleLogger();
+            var settings = SettingsReader.Read(consoleLogger);
+            var da = new AquariumWebService(consoleLogger, settings);
+            var data = da.GetReportData(38375);
+            var stop = 1;
+            Console.ReadKey();
+            */
         }
 
         #region RUN

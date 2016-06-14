@@ -73,6 +73,7 @@
     <Compile Include="Sql\SqlDataUpdater.cs" />
     <Compile Include="Sql\SqlManager.cs" />
     <Compile Include="Validation\FieldType.cs" />
+    <Compile Include="Validation\CharactersValidator.cs" />
     <Compile Include="Validation\Validation.cs" />
     <Compile Include="Validation\Validations.cs" />
     <Compile Include="Validation\Validator.cs" />

@@ -49,7 +49,7 @@ namespace LeadsImporter.Lib.DataAccessor
                     Headers = new List<string>() { "LeadID", "CustomerID", "Lender ID", "Date of Loan", "WhenCreate", "SomeData1", "SomeData2", "SomeData3" },
                     Rows = new List<ReportDataRow>()
                     {
-                        new ReportDataRow() { Data = new List<string>() { "111", "1111", "11111", "2016-01-25", "25/01/2016 11:11:11", "25-04-2014£", "Bbb1", "Yes" } },
+                        new ReportDataRow() { Data = new List<string>() { "111", "1111", "11111", "2016-01-25", "25/01/2016 11:11:11", "25-04-2014£", "Bbb,,,,££££1", "Yes" } },
                         new ReportDataRow() { Data = new List<string>() { "222", "2222", "22222", "2016-02-25", "25/02/2016 11:12:12", "15-05-2016", "Bbb2", "no" } },
                         new ReportDataRow() { Data = new List<string>() { "333", "3333", "33333", "2016-03-25", "25/03/2016 11:13:13", "22-07-2015", "B,bb3", "don't know" } },
                     }

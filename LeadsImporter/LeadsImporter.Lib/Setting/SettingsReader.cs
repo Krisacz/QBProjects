@@ -12,11 +12,11 @@ namespace LeadsImporter.Lib.Setting
             {
                 logger.AddInfo("SettingsReader >>> Read: Reading config file...");
 
-                var incomingFolderPath = ConfigurationManager.AppSettings["SqlConnectionString"];
-                logger.AddInfo($"SettingsReader >>> Read: SqlConnectionString: {incomingFolderPath}");
+                var sqlConnectionString = ConfigurationManager.AppSettings["SqlConnectionString"];
+                logger.AddInfo($"SettingsReader >>> Read: SqlConnectionString: {sqlConnectionString}");
 
-                var toBeCheckedPath = ConfigurationManager.AppSettings["PoolingTimeInSec"];
-                logger.AddInfo($"SettingsReader >>> Read: PoolingTimeInSec: {toBeCheckedPath}");
+                var poolingTimeInSec = ConfigurationManager.AppSettings["PoolingTimeInSec"];
+                logger.AddInfo($"SettingsReader >>> Read: PoolingTimeInSec: {poolingTimeInSec}");
                 
                 var aquariumUsername = ConfigurationManager.AppSettings["AquariumUsername"];
                 logger.AddInfo($"SettingsReader >>> Read: AquariumUsername: {aquariumUsername}");
@@ -24,8 +24,21 @@ namespace LeadsImporter.Lib.Setting
                 var aquariumPassword = ConfigurationManager.AppSettings["AquariumPassword"];
                 logger.AddInfo($"SettingsReader >>> Read: AquariumPassword: {aquariumPassword}");
 
+                var aquariumLogonUrl = ConfigurationManager.AppSettings["AquariumLogonUrl"];
+                logger.AddInfo($"SettingsReader >>> Read: AquariumLogonUrl: {aquariumLogonUrl}");
+
+                var aquariumLogonAction = ConfigurationManager.AppSettings["AquariumLogonAction"];
+                logger.AddInfo($"SettingsReader >>> Read: AquariumLogonAction: {aquariumLogonAction}");
+
+                var aquariumRunReportUrl = ConfigurationManager.AppSettings["AquariumRunReportUrl"];
+                logger.AddInfo($"SettingsReader >>> Read: AquariumRunReportUrl: {aquariumRunReportUrl}");
+
+                var aquariumRunReportAction = ConfigurationManager.AppSettings["AquariumRunReportAction"];
+                logger.AddInfo($"SettingsReader >>> Read: AquariumRunReportAction: {aquariumRunReportAction}");
+
                 logger.AddInfo("SettingsReader >>> Read: Config file valid.");
-                return new Settings(incomingFolderPath, toBeCheckedPath, aquariumUsername, aquariumPassword);
+                return new Settings(sqlConnectionString, poolingTimeInSec, aquariumUsername, aquariumPassword, 
+                    aquariumLogonUrl, aquariumLogonAction, aquariumRunReportUrl, aquariumRunReportAction);
             }
             catch (Exception ex)
             {
