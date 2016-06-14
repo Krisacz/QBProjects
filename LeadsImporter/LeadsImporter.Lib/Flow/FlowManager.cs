@@ -171,7 +171,6 @@ namespace LeadsImporter.Lib.Flow
                     var line = string.Join(",", reportDataRow.Data);
                     csv.Add(line);
                 }
-                //csv.Add(string.Empty);
 
                 var fileName = $"import_{DateTime.Now.ToString("ddMMyyyy_HHmmss")}.csv";
                 var pathRoot = _reportDataManager.GetOutputPath(reportData);

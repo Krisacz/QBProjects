@@ -35,7 +35,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> GetReport: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReportData: {ex.Message}");
             }
 
             return null;
@@ -65,7 +65,8 @@ namespace LeadsImporter.Lib.DataAccessor
         #endregion
 
         #region WS CALLs
-        private string CallLogon()
+
+        public string CallLogon()
         {
             try
             {
@@ -237,7 +238,8 @@ namespace LeadsImporter.Lib.DataAccessor
         #endregion
 
         #region XML PARSERS
-        private string GetSessionKey(string response)
+
+        public string GetSessionKey(string response)
         {
             try
             {
@@ -280,7 +282,7 @@ namespace LeadsImporter.Lib.DataAccessor
         {
             try
             {
-                _logger.AddInfo($"AquariumWebService >>> GetReportHeaders: Extracting data rows...");
+                _logger.AddInfo($"AquariumWebService >>> GetReportDataRows: Extracting data rows...");
                 var dataRows = new List<ReportDataRow>();
                 var xmlDocument = new XmlDocument();
                 xmlDocument.LoadXml(response);
@@ -299,7 +301,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> GetColumns: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReportDataRows: {ex.Message}");
             }
 
             return null;

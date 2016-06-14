@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadsImporter.Tester", "Lea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadsImporter.Lib", "LeadsImporter.Lib\LeadsImporter.Lib.csproj", "{334B2E28-AA13-4832-9990-5BAB68FE381B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeadsImporter.Tests", "LeadsImporter.Tests\LeadsImporter.Tests.csproj", "{7AA33384-02A6-41D7-BCD8-FC9777847AEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{334B2E28-AA13-4832-9990-5BAB68FE381B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{334B2E28-AA13-4832-9990-5BAB68FE381B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{334B2E28-AA13-4832-9990-5BAB68FE381B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AA33384-02A6-41D7-BCD8-FC9777847AEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AA33384-02A6-41D7-BCD8-FC9777847AEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AA33384-02A6-41D7-BCD8-FC9777847AEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AA33384-02A6-41D7-BCD8-FC9777847AEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
