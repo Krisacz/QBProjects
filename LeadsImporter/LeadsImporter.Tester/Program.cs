@@ -11,7 +11,7 @@ namespace LeadsImporter.Tester
     {
         private static void Main(string[] args)
         {
-            Run(RunType.ConsoleTest);
+            Run(RunType.ConsoleLive);
 
             /*
             var consoleLogger = new ConsoleLogger();
