@@ -267,7 +267,7 @@ namespace LeadsImporter.Lib.Validation
 
             //Try to parse date
             DateTime date;
-            if(!DateTime.TryParse(value, out date)) return "DATE could not be parsed.";
+            if (!DateTime.TryParse(value, out date)) return "DATE could not be parsed.";
 
             //Check if we have minimum date
             if (parameters.Count > 0 && !string.IsNullOrWhiteSpace(parameters[0]))

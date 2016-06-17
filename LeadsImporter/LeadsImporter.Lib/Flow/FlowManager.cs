@@ -142,7 +142,6 @@ namespace LeadsImporter.Lib.Flow
         #endregion
 
         #region OUTPUT
-        //TODO ADD TYPE AS A PREFIX TO OUTPUT FILE
         public void Output()
         {
             try
@@ -172,8 +171,8 @@ namespace LeadsImporter.Lib.Flow
                     var line = string.Join(",", reportDataRow.Data);
                     csv.Add(line);
                 }
-
-                var fileName = $"import_{DateTime.Now.ToString("ddMMyyyy_HHmmss")}.csv";
+                
+                var fileName = $"{type.ToLower()}_import_{DateTime.Now.ToString("ddMMyyyy_HHmmss")}.csv";
                 var pathRoot = _reportDataManager.GetOutputPath(reportData);
                 var fullPath = Path.Combine(pathRoot, fileName);
 
