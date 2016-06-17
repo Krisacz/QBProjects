@@ -6,6 +6,8 @@ using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
 using LeadsImporter.Lib.Sql;
 
+
+//TODO LEAD CREATED NEEDS TO BE CONVERTED TO STANDARD DATE/TIME FORMAT
 namespace LeadsImporter.Lib.Validation
 {
     public class Validator

@@ -142,6 +142,7 @@ namespace LeadsImporter.Lib.Flow
         #endregion
 
         #region OUTPUT
+        //TODO ADD TYPE AS A PREFIX TO OUTPUT FILE
         public void Output()
         {
             try
