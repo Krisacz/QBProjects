@@ -25,7 +25,7 @@ namespace LeadsImporter.Lib.AppController
             var sqlDataChecker = new SqlDataChecker(reportDataManager, logger);
             var sqlDataUpdater = new SqlDataUpdater(sqlManager, logger);
             var charactersValidator = new CharactersValidator(logger).Read();
-            var validator = new Validator(logger, reportDataManager, sqlDataUpdater, sqlDataChecker, charactersValidator).Read();
+            var validator = new Validator(logger, reportDataManager, sqlDataChecker, charactersValidator).Read();
             var cache = new FileCache(logger);
             var flowManager = new FlowManager(cache, dataAccessor, sqlManager, reportDataManager, sqlDataChecker, sqlDataUpdater, validator, logger);
             _executer = new TimerExecuter(logger, settings, flowManager);

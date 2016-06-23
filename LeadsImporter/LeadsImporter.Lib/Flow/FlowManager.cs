@@ -23,6 +23,8 @@ namespace LeadsImporter.Lib.Flow
 
         private List<SqlDataExceptionObject> _sqlExceptions;
         private List<SqlDataObject> _allData;
+        private List<SqlDataExceptionObject> _newSqlExceptions;
+        private List<SqlDataObject> _newData;
 
         public FlowManager(ICache cache, IDataAccessor dataAccessor, SqlManager sqlManager, 
             ReportDataManager reportDataManager, SqlDataChecker sqlDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator, ILogger logger)
@@ -45,6 +47,8 @@ namespace LeadsImporter.Lib.Flow
                 _cache.Clear();
                 _sqlExceptions = _sqlManager.GetAllExceptions();
                 _allData = _sqlManager.GetAllData();
+                _newSqlExceptions = new List<SqlDataExceptionObject>();
+                _newData = new List<SqlDataObject>();
             }
             catch (Exception ex)
             {
@@ -85,13 +89,13 @@ namespace LeadsImporter.Lib.Flow
                     if (s == 1)
                     {
                         var unvalidatedFirstReportData = _dataAccessor.GetReportData(queryId);
-                        firstReportData = _validator.ValidateReport(unvalidatedFirstReportData, _sqlExceptions);
+                        firstReportData = _validator.ValidateReport(unvalidatedFirstReportData, _sqlExceptions, _newSqlExceptions);
                     }
                     //any sequential
                     else
                     {
                         var unvalidatedReportData = _dataAccessor.GetReportData(queryId);
-                        var reportData = _validator.ValidateReport(unvalidatedReportData, _sqlExceptions);
+                        var reportData = _validator.ValidateReport(unvalidatedReportData, _sqlExceptions, _newSqlExceptions);
                         _reportDataManager.Join(firstReportData, reportData);
                     }
                 }
@@ -105,38 +109,50 @@ namespace LeadsImporter.Lib.Flow
         #endregion
 
         #region SQL CHECK
-        public void SqlCheck()
+        public void SieveData()
         {
             try
             {
                 var types = _reportDataManager.GetReportTypes();
-                foreach (var type in types) CheckData(type);
+                foreach (var type in types) _newData.AddRange(SieveReport(type));
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> SqlCheck: {ex.Message}");
+                _logger.AddError($"FlowManager >>> SieveData: {ex.Message}");
             }
         }
 
-        private void CheckData(string type)
+        private IEnumerable<SqlDataObject> SieveReport(string type)
         {
             try
             {
                 var reportData = _cache.Get(type);
-                var duplicates = new List<SqlDataExceptionObject>();
                 var reportDataWithoutExceptions = _sqlDataChecker.RemoveExceptions(reportData, _sqlExceptions);
-                var newReportData = _sqlDataChecker.RemoveExistingData(reportDataWithoutExceptions, _allData, duplicates);
-                var newReportDataWithoutDuplicates = _sqlDataChecker.RemoveDuplicates(newReportData, duplicates);
-                
-                _sqlDataUpdater.SubmitNewExceptions(duplicates);
+                var newReportData = _sqlDataChecker.RemoveExistingData(reportDataWithoutExceptions, _allData, _newSqlExceptions);
+                var newReportDataWithoutDuplicates = _sqlDataChecker.RemoveDuplicates(newReportData, _newSqlExceptions);
                 var newSqlData = SqlConverter.GetReportDataAsSqlDataObject(newReportDataWithoutDuplicates, _reportDataManager, _logger);
-                _sqlDataUpdater.SubmitNewData(newSqlData);
-
                 _cache.Store(type, newReportDataWithoutDuplicates);
+                return newSqlData;
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> CheckData[{type}]: {ex.Message}");
+                _logger.AddError($"FlowManager >>> SieveReport[{type}]: {ex.Message}");
+            }
+
+            return null;
+        }
+        #endregion
+
+        #region SQL UPDATE
+        public void SqlUpdate()
+        {
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"FlowManager >>> SqlUpdate: {ex.Message}");
             }
         }
         #endregion

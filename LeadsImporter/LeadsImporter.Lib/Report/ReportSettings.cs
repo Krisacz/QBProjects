@@ -12,5 +12,6 @@
         public string LoanDateColumnName { get; set; }
         public string LeadCreatedColumnName { get; set; }
         public string OutputPath { get; set; }
+        public string ExceptionsPath { get; set; }
     }
 }

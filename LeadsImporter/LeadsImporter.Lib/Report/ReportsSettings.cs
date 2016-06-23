@@ -137,7 +137,7 @@ namespace LeadsImporter.Lib.Report
                 if (File.Exists(_reportsSettingsPath)) return;
                 _logger.AddDetailedLog($"ReportsSettings >>> CreateIfNotExist: {_reportsSettingsPath} does't exist - creating new file...");
                 File.WriteAllLines(_reportsSettingsPath,
-                    new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,OutputPath" });
+                    new[] { "Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,OutputPath,ExceptionsPath" });
             }
             catch (Exception ex)
             {
@@ -162,6 +162,7 @@ namespace LeadsImporter.Lib.Report
                 var dateOfCreditColumnName = parts[6];
                 var dateTimeLeadCreatedColumnName =parts[7];
                 var proclaimDropPath = parts[8];
+                var exceptionsPath = parts[9];
 
                 return new ReportSettings()
                 {
@@ -173,7 +174,8 @@ namespace LeadsImporter.Lib.Report
                     LenderIdColumnName = lenderIdColumnName,
                     LoanDateColumnName = dateOfCreditColumnName,
                     LeadCreatedColumnName = dateTimeLeadCreatedColumnName,
-                    OutputPath = proclaimDropPath
+                    OutputPath = proclaimDropPath,
+                    ExceptionsPath = exceptionsPath
                 };
             }
             catch (Exception ex)

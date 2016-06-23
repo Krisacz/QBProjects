@@ -4,7 +4,7 @@
     {
         void Init();
         void ProcessReports();
-        void SqlCheck();
+        void SqlUpdate();
         void Output();
     }
 }

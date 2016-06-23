@@ -1,5 +1,5 @@
-﻿Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,OutputPath
-URSC,38379,1,LeadID,CustomerID,Lender ID,Date of Loan,WhenCreate,C:\FTP\AquariumInbound\URSC
-URSC,38380,2,LeadID,CustomerID,Lender ID,Date of Loan,WhenCreate,C:\FTP\AquariumInbound\URSC
-RPPI,38375,1,LeadID,CustomerID,Lender ID,Date of Credit,Date Executed,C:\FTP\AquariumInbound\RPPI
-RPPI,38376,2,LeadID,CustomerID,Lender ID,Date of Credit,Date Executed,C:\FTP\AquariumInbound\RPPI
+﻿Type,ReportId,ExecutionSequence,LeadIdColumnName,CustomerIdColumnName,LenderIdColumnName,LoanDateColumnName,LeadCreatedColumnName,OutputPath,ExceptionsPath
+URSC,38379,1,LeadID,CustomerID,Lender ID,Date of Loan,WhenCreate,C:\FTP\AquariumInbound\URSC\,C:\FTP\AquariumInbound\URSC\
+URSC,38380,2,LeadID,CustomerID,Lender ID,Date of Loan,WhenCreate,C:\FTP\AquariumInbound\URSC\,C:\FTP\AquariumInbound\URSC\
+RPPI,38375,1,LeadID,CustomerID,Lender ID,Date of Credit,Date Executed,C:\FTP\AquariumInbound\RPPI\,C:\FTP\AquariumInbound\RPPI\
+RPPI,38376,2,LeadID,CustomerID,Lender ID,Date of Credit,Date Executed,C:\FTP\AquariumInbound\RPPI\,C:\FTP\AquariumInbound\RPPI\

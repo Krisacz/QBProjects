@@ -15,16 +15,14 @@ namespace LeadsImporter.Lib.Validation
         private readonly ILogger _logger;
         private Validations _validations;
         private readonly ReportDataManager _reportDataManager;
-        private readonly SqlDataUpdater _sqlDataUpdater;
         private readonly string _validationFilesPath = @"Validations\\";
         private readonly SqlDataChecker _sqlDataChecker;
         private readonly CharactersValidator _charactersValidator;
 
-        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataUpdater sqlDataUpdater, SqlDataChecker sqlDataChecker, CharactersValidator charactersValidator)
+        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataChecker sqlDataChecker, CharactersValidator charactersValidator)
         {
             _logger = logger;
             _reportDataManager = reportDataManager;
-            _sqlDataUpdater = sqlDataUpdater;
             _sqlDataChecker = sqlDataChecker;
             _charactersValidator = charactersValidator;
         }
@@ -134,22 +132,20 @@ namespace LeadsImporter.Lib.Validation
         #endregion
         
         #region VALIDATE REPORT
-        public ReportData ValidateReport(ReportData reportData, List<SqlDataExceptionObject> sqlExceptions)
+        public ReportData ValidateReport(ReportData reportData, List<SqlDataExceptionObject> existingSqlExceptions, List<SqlDataExceptionObject> newSqlExceptions)
         {
             try
             {
                 _charactersValidator.Remove(reportData);
                 var validations = _validations.GetAll();
                 var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
-                var exceptions = new List<SqlDataExceptionObject>();
                 foreach (var reportDataRow in reportData.Rows)
                 {
-                    if(!_sqlDataChecker.InExceptionsList(reportData, reportDataRow, sqlExceptions))
+                    if(!_sqlDataChecker.InExceptionsList(reportData, reportDataRow, existingSqlExceptions))
                     {
-                        ValidateRow(reportData, reportDataRow, validations, exceptions, correctedReportData);
+                        ValidateRow(reportData, reportDataRow, validations, newSqlExceptions, correctedReportData);
                     }
                 }
-                _sqlDataUpdater.SubmitNewExceptions(exceptions);
                 return correctedReportData;
             }
             catch (Exception ex)
@@ -161,7 +157,7 @@ namespace LeadsImporter.Lib.Validation
         }
 
         private void ValidateRow(ReportData reportData, ReportDataRow reportDataRow, IEnumerable<Validation> validations, 
-            ICollection<SqlDataExceptionObject> exceptions, ReportData correctedReportData)
+            ICollection<SqlDataExceptionObject> newExceptions, ReportData correctedReportData)
         {
             try
             {
@@ -182,7 +178,7 @@ namespace LeadsImporter.Lib.Validation
                         var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
                         var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
                         var exceptionDesc = $"[{header}] " + exception;
-                        exceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", exceptionDesc));
+                        newExceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", exceptionDesc));
                         anyException = true;
                     }
                 }
