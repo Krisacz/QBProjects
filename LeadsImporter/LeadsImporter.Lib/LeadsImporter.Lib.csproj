@@ -55,7 +55,9 @@
     <Compile Include="Executer\TimerExecuter.cs" />
     <Compile Include="Flow\FlowManager.cs" />
     <Compile Include="Flow\IFlowManager.cs" />
+    <Compile Include="Report\ReportDataExceptions.cs" />
     <Compile Include="Report\ReportDataRow.cs" />
+    <Compile Include="Report\ReportDataRowExceptions.cs" />
     <Compile Include="Sql\SqlConverter.cs" />
     <Compile Include="Sql\SqlDataChecker.cs" />
     <Compile Include="Log\FileLogger.cs" />

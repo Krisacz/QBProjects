@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
 using LeadsImporter.Lib.Sql;
@@ -18,13 +19,15 @@ namespace LeadsImporter.Lib.Validation
         private readonly string _validationFilesPath = @"Validations\\";
         private readonly SqlDataChecker _sqlDataChecker;
         private readonly CharactersValidator _charactersValidator;
+        private readonly ICache _cache;
 
-        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataChecker sqlDataChecker, CharactersValidator charactersValidator)
+        public Validator(ILogger logger, ReportDataManager reportDataManager, SqlDataChecker sqlDataChecker, CharactersValidator charactersValidator, ICache cache)
         {
             _logger = logger;
             _reportDataManager = reportDataManager;
             _sqlDataChecker = sqlDataChecker;
             _charactersValidator = charactersValidator;
+            _cache = cache;
         }
 
         #region READ ALL VALIDATION FILES
@@ -48,7 +51,7 @@ namespace LeadsImporter.Lib.Validation
                     }
                     else
                     {
-                        _logger.AddError($"Validator >>> ReadAll: Invalid validation file: {validationFile}");
+                        _logger.AddError($"Validator >>> ReadAll: Invalid validation file: {validationFile}", null);
                     }
 
                 }
@@ -56,7 +59,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"Validator >>> ReadAll: {ex.Message}");
+                _logger.AddError($"Validator >>> ReadAll:", ex);
             }
 
             return this;
@@ -126,7 +129,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"Validator >>> ReadAll: {ex.Message}");
+                _logger.AddError($"Validator >>> ReadAll:", ex);
             }
         }
         #endregion
@@ -138,47 +141,67 @@ namespace LeadsImporter.Lib.Validation
             {
                 _charactersValidator.Remove(reportData);
                 var validations = _validations.GetAll();
+                var reportExceptions = new ReportDataExceptions() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRowExceptions>() };
                 var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
                 foreach (var reportDataRow in reportData.Rows)
                 {
                     if(!_sqlDataChecker.InExceptionsList(reportData, reportDataRow, existingSqlExceptions))
                     {
-                        ValidateRow(reportData, reportDataRow, validations, newSqlExceptions, correctedReportData);
+                        ValidateRow(reportData, reportDataRow, validations, correctedReportData, newSqlExceptions, reportExceptions);
                     }
                 }
+
+                _cache.StoreExceptions(_reportDataManager.GetReportType(reportData), reportExceptions);
                 return correctedReportData;
             }
             catch (Exception ex)
             {
-                _logger.AddError($"Validator >>> ValidateReport: {ex.Message}");
+                _logger.AddError($"Validator >>> ValidateReport:", ex);
             }
 
             return null;
         }
 
-        private void ValidateRow(ReportData reportData, ReportDataRow reportDataRow, IEnumerable<Validation> validations, 
-            ICollection<SqlDataExceptionObject> newExceptions, ReportData correctedReportData)
+        private void ValidateRow(ReportData reportData, ReportDataRow reportDataRow, IReadOnlyCollection<Validation> validations, 
+            ReportData correctedReportData, ICollection<SqlDataExceptionObject> newSqlExceptions, ReportDataExceptions reportExceptions)
         {
             try
             {
                 var anyException = false;
-                foreach (var validation in validations)
+
+                var type = _reportDataManager.GetReportType(reportData);
+                var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
+
+                var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
+                if (string.IsNullOrWhiteSpace(leadId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LeadId" });
+
+                var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
+                if (string.IsNullOrWhiteSpace(customerId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid CustomerId" });
+
+                var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
+                if (string.IsNullOrWhiteSpace(lenderId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LenderId" });
+
+                var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
+                if (loanDate == DateTime.MinValue) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LoanDate" });
+
+                if (leadId == null || customerId == null || lenderId == null || loanDate == DateTime.MinValue)
                 {
-                    if (validation.QueryId != reportData.QueryId) continue;
-                    for (var index = 0; index < reportData.Headers.Count; index++)
+                    newSqlExceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", "Invalid LeadId/CustomerId/LenderId/LoanDate"));
+                    anyException = true;
+                }
+                
+                for (var index = 0; index < reportData.Headers.Count; index++)
+                {
+                    foreach (var validation in validations)
                     {
+                        if (validation.QueryId != reportData.QueryId) continue;
                         var header = reportData.Headers[index];
                         if (header != validation.ColumnName) continue;
                         var exception = Validate(reportDataRow.Data[index], validation);
                         if (exception == null) continue;
-                        var type = _reportDataManager.GetReportType(reportData);
-                        var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
-                        var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
-                        var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
-                        var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
-                        var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
                         var exceptionDesc = $"[{header}] " + exception;
-                        newExceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", exceptionDesc));
+                        newSqlExceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", exceptionDesc));
+                        reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = $"VALIDATION: {exceptionDesc}" });
                         anyException = true;
                     }
                 }
@@ -187,7 +210,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"Validator >>> ValidateRow: {ex.Message}");
+                _logger.AddError($"Validator >>> ValidateRow:", ex);
             }
         }
 
@@ -207,7 +230,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"Validator >>> Validate: {ex.Message}");
+                _logger.AddError($"Validator >>> Validate:", ex);
             }
 
             return null;
@@ -344,7 +367,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"Validator >>> ReadAll[{validationFile}]: {ex.Message}");
+                _logger.AddError($"Validator >>> ReadAll[{validationFile}]:", ex);
             }
 
             return null;
@@ -366,14 +389,14 @@ namespace LeadsImporter.Lib.Validation
                 var isNumeric = int.TryParse(lines[0], out n);
                 if (!isNumeric)
                 {
-                    _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: Line {0} invalid - Value should be numeric");
+                    _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: Line {0} invalid - Value should be numeric", null);
                     return false;
                 }
 
                 //2nd line - can not be empty
                 if (string.IsNullOrWhiteSpace(lines[1]))
                 {
-                    _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: Line {1} invalid - Can not be empty");
+                    _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: Line {1} invalid - Can not be empty", null);
                     return false;
                 }
 
@@ -381,7 +404,7 @@ namespace LeadsImporter.Lib.Validation
                 if (string.IsNullOrWhiteSpace(lines[2])) return false;
                 if (lines[2].ToLower() != "true" && lines[2].ToLower() != "false")
                 {
-                    _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: Line {2} invalid - Value should be TRUE or FALSE");
+                    _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: Line {2} invalid - Value should be TRUE or FALSE", null);
                     return false;
                 }
 
@@ -389,7 +412,7 @@ namespace LeadsImporter.Lib.Validation
                 if (string.IsNullOrWhiteSpace(lines[3])) return false;
                 if (lines[3].ToLower() != "string" && lines[3].ToLower() != "fixed" && lines[3].ToLower() != "date" && lines[3].ToLower() != "value")
                 {
-                    _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: Line {2} invalid - Value should be STRING, FIXED, DATE or VALUE");
+                    _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: Line {2} invalid - Value should be STRING, FIXED, DATE or VALUE", null);
                     return false;
                 }
 
@@ -397,7 +420,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"Validator >>> IsFileValid[{validationFile}]: {ex.Message}");
+                _logger.AddError($"Validator >>> IsFileValid[{validationFile}]:", ex);
             }
 
             return false;

@@ -6,6 +6,8 @@ namespace LeadsImporter.Lib.Cache
     {
         void Clear();
         void Store(string type, ReportData data);
+        void StoreExceptions(string type, ReportDataExceptions exceptions);
         ReportData Get(string type);
+        ReportDataExceptions GetExceptions(string type);
     }
 }

@@ -35,7 +35,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> GetReportData: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReportData:", ex);
             }
 
             return null;
@@ -57,7 +57,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> GetReport[{queryId}]: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReport[{queryId}]:", ex);
             }
 
             return null;
@@ -91,7 +91,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> CallLogon: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CallLogon:", ex);
             }
 
             return null;
@@ -121,7 +121,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> CallRunReport: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CallRunReport:", ex);
             }
 
             return null;
@@ -139,7 +139,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> CreateSoapEnvelope: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CreateSoapEnvelope:", ex);
             }
 
             return null;
@@ -158,7 +158,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> CreateWebRequest: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> CreateWebRequest:", ex);
             }
 
             return null;
@@ -175,7 +175,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> InsertSoapEnvelopeIntoWebRequest: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> InsertSoapEnvelopeIntoWebRequest:", ex);
             }
         }
         #endregion
@@ -251,7 +251,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> GetSessionKey: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetSessionKey:", ex);
             }
 
             return null;
@@ -272,7 +272,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> GetReportHeaders: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReportHeaders:", ex);
             }
 
             return null;
@@ -301,7 +301,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"AquariumWebService >>> GetReportDataRows: {ex.Message}");
+                _logger.AddError($"AquariumWebService >>> GetReportDataRows:", ex);
             }
 
             return null;

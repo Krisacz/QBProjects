@@ -50,7 +50,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlManager >>> GetAllExceptions: {ex.Message}");
+                _logger.AddError($"SqlManager >>> GetAllExceptions:", ex);
             }
             
             return list;
@@ -87,7 +87,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlManager >>> GetAllData: {ex.Message}");
+                _logger.AddError($"SqlManager >>> GetAllData:", ex);
             }
 
             return list;
@@ -132,7 +132,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlManager >>> DuplicatesCheck: {ex.Message}");
+                _logger.AddError($"SqlManager >>> DuplicatesCheck:", ex);
             }
 
             return null;
@@ -177,7 +177,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlManager >>> InsertRecord: {ex.Message}");
+                _logger.AddError($"SqlManager >>> InsertRecord:", ex);
             }
         }
         #endregion
@@ -224,7 +224,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlManager >>> InsertException: {ex.Message}");
+                _logger.AddError($"SqlManager >>> InsertException:", ex);
             }
         }
         #endregion

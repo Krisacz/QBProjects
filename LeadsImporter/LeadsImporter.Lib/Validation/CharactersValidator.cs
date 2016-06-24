@@ -30,7 +30,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"CharactersValidator >>> Read: {ex.Message}");
+                _logger.AddError($"CharactersValidator >>> Read:", ex);
             }
 
             return this;
@@ -46,7 +46,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"CharactersValidator >>> CreateIfNotExist: {ex.Message}");
+                _logger.AddError($"CharactersValidator >>> CreateIfNotExist:", ex);
             }
         }
         #endregion
@@ -68,7 +68,7 @@ namespace LeadsImporter.Lib.Validation
             }
             catch (Exception ex)
             {
-                _logger.AddError($"CharactersValidator >>> Remove: {ex.Message}");
+                _logger.AddError($"CharactersValidator >>> Remove:", ex);
             }
         }
         #endregion

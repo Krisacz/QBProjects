@@ -6,10 +6,23 @@ namespace LeadsImporter.Lib.Log
     {
         public bool EnableDetailedLog = true;
 
-        public void AddError(string error)
+        public void AddError(string error, Exception exception)
         {
             var dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            Console.WriteLine("{0} [ERROR] \t{1}", dt, error);
+            var txt = $"{dt} [ERROR]\t{error} ";
+            if (exception == null)
+            {
+                txt += Environment.NewLine;
+            }
+            else
+            {
+                txt += $"Error Message: {exception.Message}";
+                if (exception.InnerException != null && !string.IsNullOrWhiteSpace(exception.InnerException.ToString()))
+                {
+                    txt += $"\t\tInnerException: {exception.InnerException}";
+                }
+            }
+            Console.WriteLine(txt);
         }
 
         public void AddInfo(string info)
@@ -18,14 +31,9 @@ namespace LeadsImporter.Lib.Log
             Console.WriteLine("{0} [INFO] \t{1}", dt, info);
         }
 
-        public bool IsDetailedLogEnabled()
-        {
-            return EnableDetailedLog;
-        }
-
         public void AddDetailedLog(string detail)
         {
-            if(!IsDetailedLogEnabled()) return;
+            if(!EnableDetailedLog) return;
             var dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             Console.WriteLine("{0} [INFO] \t{1}", dt, detail);
         }

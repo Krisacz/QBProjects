@@ -31,7 +31,7 @@ namespace LeadsImporter.Lib.DataAccessor
             }
             catch (Exception ex)
             {
-                _logger.AddError($"TestDataAccessor >>> GetReportData[{reportId}]: {ex.Message}");
+                _logger.AddError($"TestDataAccessor >>> GetReportData[{reportId}]:", ex);
             }
 
             return null;
@@ -52,17 +52,19 @@ namespace LeadsImporter.Lib.DataAccessor
                         new ReportDataRow() { Data = new List<string>() { "111", "1111", "11111", "2016-01-25", "25/01/2016 11:11:11", "25-04-2014£", "Bbb,,,,££££1", "Yes" } },
                         new ReportDataRow() { Data = new List<string>() { "222", "2222", "22222", "2016-02-25", "25/02/2016 11:12:12", "15-05-2016", "Bbb2", "no" } },
                         new ReportDataRow() { Data = new List<string>() { "333", "3333", "33333", "2016-03-25", "25/03/2016 11:13:13", "22-07-2015", "B,bb3", "don't know" } },
+                        new ReportDataRow() { Data = new List<string>() { "444", "4444", "55555", "2016-003-25", "25/03/2016 11:13:13", "22-07-2015", "B,bb3", "don't know" } },
                     }
                 };
             }
             catch (Exception ex)
             {
-                _logger.AddError($"TestDataAccessor >>> GetUrscReport: {ex.Message}");
+                _logger.AddError($"TestDataAccessor >>> GetUrscReport:", ex);
             }
 
             return null;
         }
 
+        #region URSC 2
         private ReportData GetUrscReport2()
         {
             try
@@ -74,19 +76,21 @@ namespace LeadsImporter.Lib.DataAccessor
                     Headers = new List<string>() { "LeadID", "CustomerID", "Lender ID", "Date of Loan", "WhenCreate", "AdditionalData1", "AdditionalData2", "AdditionalData3" },
                     Rows = new List<ReportDataRow>()
                     {
-                        new ReportDataRow() { Data = new List<string>() { "111", "1111", "11111", "2016-01-25", "25/01/2016 11:11:11", "Additional1-1", "Additional1-2", "Additional1-3" } },
-                        new ReportDataRow() { Data = new List<string>() { "222", "2222", "22222", "2016-02-25", "25/02/2016 11:12:12", "Additional2-1", "Additional2-2", "Additional2-3" } },
-                        new ReportDataRow() { Data = new List<string>() { "333", "3333", "33333", "2016-03-25", "25/03/2016 11:13:13", "Additional3-1", "Additional3-2", "Additional3-3" } },
+                        //new ReportDataRow() { Data = new List<string>() { "111", "1111", "11111", "2016-01-25", "25/01/2016 11:11:11", "Additional1-1", "Additional1-2", "Additional1-3" } },
+                        //new ReportDataRow() { Data = new List<string>() { "222", "2222", "22222", "2016-02-25", "25/02/2016 11:12:12", "Additional2-1", "Additional2-2", "Additional2-3" } },
+                        //new ReportDataRow() { Data = new List<string>() { "333", "3333", "33333", "2016-03-25", "25/03/2016 11:13:13", "Additional3-1", "Additional3-2", "Additional3-3" } },
+                        //new ReportDataRow() { Data = new List<string>() { "333", "", "33333", "x2016-03-25", "25/03/2016 11:13:13", "Additional3-1", "Additional3-2", "Additional3-3" } },
                     }
                 };
             }
             catch (Exception ex)
             {
-                _logger.AddError($"TestDataAccessor >>> GetUrscReport2: {ex.Message}");
+                _logger.AddError($"TestDataAccessor >>> GetUrscReport2:", ex);
             }
 
             return null;
         }
+        #endregion
         #endregion
 
         #region GET RPPI REPORT
@@ -104,17 +108,19 @@ namespace LeadsImporter.Lib.DataAccessor
                         new ReportDataRow() { Data = new List<string>() { "666", "6666", "66666", "2016-06-25", "25/01/2016 11:16:11", "Aa,a6", "Bbb6", "Ccc6" } },
                         new ReportDataRow() { Data = new List<string>() { "777", "7777", "77777", "2016-07-25", "25/02/2016 11:17:12", "Aaa7", "B£bb7", "Ccc7" } },
                         new ReportDataRow() { Data = new List<string>() { "888", "8888", "88888", "2016-08-25", "25/03/2016 11:18:13", "Aaa8", "Bb,b8", "Ccc8" } },
+                        new ReportDataRow() { Data = new List<string>() { "999", "", "99999", "2z016-08-25", "25/03/2016 11:18:13", "Aaa8", "Bb,b8", "Ccc8" } },
                     }
                 };
             }
             catch (Exception ex)
             {
-                _logger.AddError($"TestDataAccessor >>> GetRppiReport: {ex.Message}");
+                _logger.AddError($"TestDataAccessor >>> GetRppiReport:", ex);
             }
 
             return null;
         }
 
+        #region RPPI2
         private ReportData GetRppiReport2()
         {
             try
@@ -126,19 +132,20 @@ namespace LeadsImporter.Lib.DataAccessor
                     Headers = new List<string>() { "LeadID", "CustomerID", "Lender ID", "Date of Credit", "Date Executed", "AdditionalDataA", "AdditionalDataB", "AdditionalDataC" },
                     Rows = new List<ReportDataRow>()
                     {
-                        new ReportDataRow() { Data = new List<string>() { "666", "6666", "66666", "2016-06-25", "25/01/2016 11:16:11", "AdditionalA-1", "AdditionalA-2", "AdditionalA-3" } },
-                        new ReportDataRow() { Data = new List<string>() { "777", "7777", "77777", "2016-07-25", "25/02/2016 11:17:12", "AdditionalB-1", "AdditionalB-2", "AdditionalB-3" } },
-                        new ReportDataRow() { Data = new List<string>() { "888", "8888", "88888", "2016-08-25", "25/03/2016 11:18:13", "AdditionalC-1", "AdditionalC-2", "AdditionalC-3" } },
+                        //new ReportDataRow() { Data = new List<string>() { "666", "6666", "66666", "2016-06-25", "25/01/2016 11:16:11", "AdditionalA-1", "AdditionalA-2", "AdditionalA-3" } },
+                        //new ReportDataRow() { Data = new List<string>() { "777", "7777", "77777", "2016-07-25", "25/02/2016 11:17:12", "AdditionalB-1", "AdditionalB-2", "AdditionalB-3" } },
+                        //new ReportDataRow() { Data = new List<string>() { "888", "8888", "88888", "2016-08-25", "25/03/2016 11:18:13", "AdditionalC-1", "AdditionalC-2", "AdditionalC-3" } },
                     }
                 };
             }
             catch (Exception ex)
             {
-                _logger.AddError($"TestDataAccessor >>> GetRppiReport2: {ex.Message}");
+                _logger.AddError($"TestDataAccessor >>> GetRppiReport2:", ex);
             }
 
             return null;
         }
+        #endregion
         #endregion
     }
 }

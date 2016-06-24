@@ -40,7 +40,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportsSettings >>> ReadAll: {ex.Message}");
+                _logger.AddError($"ReportsSettings >>> ReadAll:", ex);
             }
 
             return this;
@@ -57,7 +57,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportsSettings >>> GetTypes: {ex.Message}");
+                _logger.AddError($"ReportsSettings >>> GetTypes:", ex);
             }
 
             return null;
@@ -74,7 +74,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportsSettings >>> GetSequencesPerType: {ex.Message}");
+                _logger.AddError($"ReportsSettings >>> GetSequencesPerType:", ex);
             }
 
             return null;
@@ -91,7 +91,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportsSettings >>> GetReportSettings: {ex.Message}");
+                _logger.AddError($"ReportsSettings >>> GetReportSettings:", ex);
             }
 
             return null;
@@ -106,7 +106,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportsSettings >>> GetReportSettings: {ex.Message}");
+                _logger.AddError($"ReportsSettings >>> GetReportSettings:", ex);
             }
 
             return null;
@@ -122,7 +122,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportsSettings >>> GetTypeFromQueryId: {ex.Message}");
+                _logger.AddError($"ReportsSettings >>> GetTypeFromQueryId:", ex);
             }
 
             return null;
@@ -141,7 +141,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportsSettings >>> CreateIfNotExist: {ex.Message}");
+                _logger.AddError($"ReportsSettings >>> CreateIfNotExist:", ex);
             }
         }
 
@@ -180,7 +180,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportsSettings >>> MapReportSettings [Line {i}]: {ex.Message}");
+                _logger.AddError($"ReportsSettings >>> MapReportSettings [Line {i}]:", ex);
             }
 
             return null;

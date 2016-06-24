@@ -27,7 +27,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                logger.AddError($"SqlConverter >>> GetReportDataAsSqlDataObject: {ex.Message}");
+                logger.AddError($"SqlConverter >>> GetReportDataAsSqlDataObject:", ex);
             }
 
             return null;

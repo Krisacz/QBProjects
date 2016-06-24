@@ -42,7 +42,7 @@ namespace LeadsImporter.Lib.Setting
             }
             catch (Exception ex)
             {
-                logger.AddError($"SettingsReader >>> Read: {ex.Message}");
+                logger.AddError($"SettingsReader >>> Read:", ex);
             }
 
             return null;

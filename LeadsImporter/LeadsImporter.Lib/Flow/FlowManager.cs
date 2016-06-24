@@ -24,7 +24,7 @@ namespace LeadsImporter.Lib.Flow
         private List<SqlDataExceptionObject> _sqlExceptions;
         private List<SqlDataObject> _allData;
         private List<SqlDataExceptionObject> _newSqlExceptions;
-        private List<SqlDataObject> _newData;
+        private List<SqlDataObject> _newSqlData;
 
         public FlowManager(ICache cache, IDataAccessor dataAccessor, SqlManager sqlManager, 
             ReportDataManager reportDataManager, SqlDataChecker sqlDataChecker, SqlDataUpdater sqlDataUpdater, Validator validator, ILogger logger)
@@ -45,20 +45,22 @@ namespace LeadsImporter.Lib.Flow
             try
             {
                 _cache.Clear();
+
                 _sqlExceptions = _sqlManager.GetAllExceptions();
                 _allData = _sqlManager.GetAllData();
+
                 _newSqlExceptions = new List<SqlDataExceptionObject>();
-                _newData = new List<SqlDataObject>();
+                _newSqlData = new List<SqlDataObject>();
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> Init: {ex.Message}");
+                _logger.AddError($"FlowManager >>> Init:", ex);
             }
         }
         #endregion
 
         #region PROCESS REPORTS
-        public void ProcessReports()
+        public void Process()
         {
             try
             {
@@ -66,16 +68,19 @@ namespace LeadsImporter.Lib.Flow
 
                 foreach (var type in types)
                 {
-                    ProcessReport(type);
+                    ValidateAndJoin(type);
+                    SieveReport(type);
                 }
+
+                SqlUpdate();
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> ProcessReports: {ex.Message}");
+                _logger.AddError($"FlowManager >>> Process:", ex);
             }
         }
         
-        private void ProcessReport(string type)
+        private void ValidateAndJoin(string type)
         {
             try
             {
@@ -103,26 +108,11 @@ namespace LeadsImporter.Lib.Flow
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> ProcessReport[{type}]: {ex.Message}");
-            }
-        }
-        #endregion
-
-        #region SQL CHECK
-        public void SieveData()
-        {
-            try
-            {
-                var types = _reportDataManager.GetReportTypes();
-                foreach (var type in types) _newData.AddRange(SieveReport(type));
-            }
-            catch (Exception ex)
-            {
-                _logger.AddError($"FlowManager >>> SieveData: {ex.Message}");
+                _logger.AddError($"FlowManager >>> ProcessReport[{type}]:", ex);
             }
         }
 
-        private IEnumerable<SqlDataObject> SieveReport(string type)
+        private void SieveReport(string type)
         {
             try
             {
@@ -131,28 +121,27 @@ namespace LeadsImporter.Lib.Flow
                 var newReportData = _sqlDataChecker.RemoveExistingData(reportDataWithoutExceptions, _allData, _newSqlExceptions);
                 var newReportDataWithoutDuplicates = _sqlDataChecker.RemoveDuplicates(newReportData, _newSqlExceptions);
                 var newSqlData = SqlConverter.GetReportDataAsSqlDataObject(newReportDataWithoutDuplicates, _reportDataManager, _logger);
+                _newSqlData.AddRange(newSqlData);
                 _cache.Store(type, newReportDataWithoutDuplicates);
-                return newSqlData;
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> SieveReport[{type}]: {ex.Message}");
+                _logger.AddError($"FlowManager >>> SieveReport[{type}]:", ex);
             }
-
-            return null;
         }
         #endregion
 
         #region SQL UPDATE
-        public void SqlUpdate()
+        private void SqlUpdate()
         {
             try
             {
-
+                _sqlDataUpdater.SubmitNewData(_newSqlData);
+                _sqlDataUpdater.SubmitNewExceptions(_newSqlExceptions);
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> SqlUpdate: {ex.Message}");
+                _logger.AddError($"FlowManager >>> SqlUpdate:", ex);
             }
         }
         #endregion
@@ -166,14 +155,15 @@ namespace LeadsImporter.Lib.Flow
                 foreach (var type in types)
                 {
                     SaveReport(type);
+                    SaveReportExceptions(type);
                 }
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> Output: {ex.Message}");
+                _logger.AddError($"FlowManager >>> Output:", ex);
             }
         }
-
+        
         private void SaveReport(string type)
         {
             try
@@ -196,7 +186,35 @@ namespace LeadsImporter.Lib.Flow
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FlowManager >>> SaveReport[{type}]: {ex.Message}");
+                _logger.AddError($"FlowManager >>> SaveReport[{type}]:", ex);
+            }
+        }
+
+        private void SaveReportExceptions(string type)
+        {
+            try
+            {
+                var reportData = _cache.GetExceptions(type);
+                var csv = new List<string>();
+                if (reportData.Rows.Count == 0) return;
+
+                csv.Add(string.Join(",", reportData.Headers));
+                foreach (var reportDataRow in reportData.Rows)
+                {
+                    var line = string.Join(",", reportDataRow.Data);
+                    line += $",{reportDataRow.Exception}"; 
+                    csv.Add(line);
+                }
+
+                var fileName = $"{type.ToLower()}_exceptions_{DateTime.Now.ToString("ddMMyyyy_HHmmss")}.csv";
+                var pathRoot = _reportDataManager.GetExceptionsPath(reportData);
+                var fullPath = Path.Combine(pathRoot, fileName);
+
+                File.WriteAllLines(fullPath, csv);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"FlowManager >>> SaveReportExceptions[{type}]:", ex);
             }
         }
         #endregion

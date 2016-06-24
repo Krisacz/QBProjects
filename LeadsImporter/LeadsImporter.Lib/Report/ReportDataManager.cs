@@ -39,7 +39,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> Join: {ex.Message}");
+                _logger.AddError("ReportDataManager >>> Join:", ex);
             }
         }
         #endregion
@@ -53,7 +53,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForLeadId: {ex.Message}");
+                _logger.AddError("ReportDataManager >>> GetValueForLeadId", ex);
             }
 
             return null;
@@ -67,7 +67,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForCustomerId: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> GetValueForCustomerId:", ex);
             }
 
             return null;
@@ -81,7 +81,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForLenderId: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> GetValueForLenderId:", ex);
             }
 
             return null;
@@ -95,7 +95,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForLoanDate: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> GetValueForLoanDate:", ex);
             }
 
             return DateTime.MinValue;
@@ -109,7 +109,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForLeadCreated: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> GetValueForLeadCreated:", ex);
             }
 
             return DateTime.MinValue;
@@ -124,7 +124,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForColumn: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> GetValueForColumn:", ex);
             }
 
             return null;
@@ -140,7 +140,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetReportType: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> GetReportType:", ex);
             }
 
             return null;
@@ -172,6 +172,13 @@ namespace LeadsImporter.Lib.Report
         public string GetOutputPath(ReportData reportData)
         {
             return _reportsSettings.GetReportSettings(reportData.QueryId).OutputPath;
+        }
+        #endregion
+
+        #region GET OUTPUT PATH
+        public string GetExceptionsPath(ReportDataExceptions reportData)
+        {
+            return _reportsSettings.GetReportSettings(reportData.QueryId).ExceptionsPath;
         }
         #endregion
 
@@ -213,7 +220,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetExistingReportDataRowIndex: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> GetExistingReportDataRowIndex:", ex);
             }
 
             return null;
@@ -230,7 +237,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetColumnIndex: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> GetColumnIndex:", ex);
             }
             
             return -1;
@@ -253,7 +260,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> AddHeaderIfNotExist: {ex.Message}");
+                _logger.AddError($"ReportDataManager >>> AddHeaderIfNotExist:", ex);
             }
         }
         #endregion

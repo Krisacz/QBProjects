@@ -22,11 +22,11 @@ namespace LeadsImporter.Lib.AppController
             var reportDataManager = new ReportDataManager(logger, reportsSettings);
             var dataAccessor = new AquariumWebService(logger, settings);
             var sqlManager = new SqlManager(logger, settings);
-            var sqlDataChecker = new SqlDataChecker(reportDataManager, logger);
+            var cache = new InMemoryCache(logger);
+            var sqlDataChecker = new SqlDataChecker(reportDataManager, logger, cache);
             var sqlDataUpdater = new SqlDataUpdater(sqlManager, logger);
             var charactersValidator = new CharactersValidator(logger).Read();
-            var validator = new Validator(logger, reportDataManager, sqlDataChecker, charactersValidator).Read();
-            var cache = new InMemoryCache(logger);
+            var validator = new Validator(logger, reportDataManager, sqlDataChecker, charactersValidator, cache).Read();
             var flowManager = new FlowManager(cache, dataAccessor, sqlManager, reportDataManager, sqlDataChecker, sqlDataUpdater, validator, logger);
             _executer = new TimerExecuter(logger, settings, flowManager);
         }

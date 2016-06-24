@@ -29,7 +29,7 @@ namespace LeadsImporter.Lib.Cache
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FileCache >>> Clear: {ex.Message}");
+                _logger.AddError($"FileCache >>> Clear:", ex);
             }
         }
         #endregion
@@ -55,9 +55,34 @@ namespace LeadsImporter.Lib.Cache
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FileCache >>> Store[{type}]: {ex.Message}");
+                _logger.AddError($"FileCache >>> Store[{type}]:", ex);
             }
         }
+
+        public void StoreExceptions(string type, ReportDataExceptions exceptions)
+        {
+            try
+            {
+                _logger.AddDetailedLog($"FileCache >>> Store: Caching data for {type}...");
+                Directory.CreateDirectory(_tempCachePath);
+                var serializer = new XmlSerializer(typeof(ReportDataExceptions));
+                var xmlWriterSettings = new XmlWriterSettings { Indent = true, IndentChars = "  ", NewLineChars = "\r\n", NewLineHandling = NewLineHandling.Replace };
+                using (var stringWriter = new StringWriter())
+                using (var xmlWriter = XmlWriter.Create(stringWriter, xmlWriterSettings))
+                {
+                    serializer.Serialize(xmlWriter, exceptions);
+                    var xml = stringWriter.ToString();
+                    var fileName = $"{type}_exceptions.xml";
+                    var fullPath = Path.Combine(_tempCachePath, fileName);
+                    File.WriteAllText(fullPath, xml);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"FileCache >>> Store[{type}]:", ex);
+            }
+        }
+
         #endregion
 
         #region GET
@@ -77,11 +102,34 @@ namespace LeadsImporter.Lib.Cache
             }
             catch (Exception ex)
             {
-                _logger.AddError($"FileCache >>> Get[{type}]: {ex.Message}");
+                _logger.AddError($"FileCache >>> Get[{type}]:", ex);
             }
 
             return null;
         }
+
+        public ReportDataExceptions GetExceptions(string type)
+        {
+            try
+            {
+                _logger.AddDetailedLog($"FileCache >>> Get: Getting data for {type}...");
+                ReportDataExceptions data = null;
+                var xmlSerializer = new XmlSerializer(typeof(ReportDataExceptions));
+                var fileName = $"{type}_exceptions.xml";
+                var fullPath = Path.Combine(_tempCachePath, fileName);
+                var streamReader = new StreamReader(fullPath);
+                data = (ReportDataExceptions)xmlSerializer.Deserialize(streamReader);
+                streamReader.Close();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                _logger.AddError($"FileCache >>> GetExceptions[{type}]:", ex);
+            }
+
+            return null;
+        }
+
         #endregion
     }
 }

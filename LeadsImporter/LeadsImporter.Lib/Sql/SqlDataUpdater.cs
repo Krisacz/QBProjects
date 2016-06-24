@@ -27,7 +27,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlDataUpdater >>> SubmitNewData: {ex.Message}");
+                _logger.AddError($"SqlDataUpdater >>> SubmitNewData:", ex);
             }
         }
         #endregion
@@ -44,7 +44,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlDataUpdater >>> SubmitNewExceptions: {ex.Message}");
+                _logger.AddError($"SqlDataUpdater >>> SubmitNewExceptions:", ex);
             }
         }
         #endregion

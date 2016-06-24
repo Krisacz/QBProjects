@@ -3,8 +3,7 @@
     public interface IFlowManager
     {
         void Init();
-        void ProcessReports();
-        void SqlUpdate();
+        void Process();
         void Output();
     }
 }

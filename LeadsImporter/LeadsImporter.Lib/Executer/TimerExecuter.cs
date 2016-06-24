@@ -34,7 +34,7 @@ namespace LeadsImporter.Lib.Executer
             }
             catch (Exception ex)
             {
-                _logger.AddError($"TimerExecuter >>> Start: {ex.Message}");
+                _logger.AddError($"TimerExecuter >>> Start:", ex);
             }
         }
         #endregion
@@ -49,7 +49,7 @@ namespace LeadsImporter.Lib.Executer
             }
             catch (Exception ex)
             {
-                _logger.AddError($"TimerExecuter >>> Stop: {ex.Message}");
+                _logger.AddError($"TimerExecuter >>> Stop:", ex);
             }
         }
         #endregion
@@ -68,8 +68,7 @@ namespace LeadsImporter.Lib.Executer
                 _logger.AddInfo("TimerExecuter >>> Execute: (Waking up) Executing...");
 
                 _flowManager.Init();
-                _flowManager.ProcessReports();
-                _flowManager.SqlCheck();
+                _flowManager.Process();
                 _flowManager.Output();
 
                 _logger.AddInfo("TimerExecuter >>> Execute: Finished! (Sleeping...)");
@@ -77,7 +76,7 @@ namespace LeadsImporter.Lib.Executer
             }
             catch (Exception ex)
             {
-                _logger.AddError($"TimerExecuter >>> Execute: {ex.Message}");
+                _logger.AddError($"TimerExecuter >>> Execute:", ex);
             }
             finally
             {

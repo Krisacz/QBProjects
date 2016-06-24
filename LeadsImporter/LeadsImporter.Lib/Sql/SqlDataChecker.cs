@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.Log;
 using LeadsImporter.Lib.Report;
 
@@ -9,11 +10,13 @@ namespace LeadsImporter.Lib.Sql
     {
         private readonly ReportDataManager _reportDataManager;
         private readonly ILogger _logger;
+        private readonly ICache _cache;
 
-        public SqlDataChecker(ReportDataManager reportDataManager, ILogger logger)
+        public SqlDataChecker(ReportDataManager reportDataManager, ILogger logger, ICache cache)
         {
             _reportDataManager = reportDataManager;
             _logger = logger;
+            _cache = cache;
         }
 
         #region REMOVE EXCEPTIONS
@@ -63,7 +66,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlDataChecker >>> RemoveExceptions: {ex.Message}");
+                _logger.AddError($"SqlDataChecker >>> RemoveExceptions:", ex);
             }
 
             return null;
@@ -82,12 +85,9 @@ namespace LeadsImporter.Lib.Sql
                 }
                 else
                 {
-                    var returnReportData = new ReportData()
-                    {
-                        QueryId = reportData.QueryId,
-                        Headers = reportData.Headers,
-                        Rows = new List<ReportDataRow>()
-                    };
+                    var returnReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
+                    var type = _reportDataManager.GetReportType(reportData);
+                    var reportExceptions = _cache.GetExceptions(type);
 
                     foreach (var reportDataRow in reportData.Rows)
                     {
@@ -110,25 +110,26 @@ namespace LeadsImporter.Lib.Sql
                             //Is Duplicate?
                             if (data.LeadId != leadId && data.CustomerId == customerId && data.LenderId == lenderId && data.LoanDate == loanDate)
                             {
-                                var type = _reportDataManager.GetReportType(reportData);
                                 var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
                                 var exceptionDesc = $"Id[{data.Id}]";
                                 duplicates.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "DUPLICATE", exceptionDesc));
+                                reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = $"DUPLICATE: {exceptionDesc}" });
                                 processed = true;
                                 break;
                             }
                         }
 
+                        _cache.StoreExceptions(type, reportExceptions);
+
                         //New row of data
                         if (!processed) returnReportData.Rows.Add(reportDataRow);
-
                     }
                     return returnReportData;
                 }
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlDataChecker >>> RemoveExisitngData: {ex.Message}");
+                _logger.AddError($"SqlDataChecker >>> RemoveExisitngData:", ex);
             }
             
             return null;
@@ -141,14 +142,16 @@ namespace LeadsImporter.Lib.Sql
             try
             {
                 var uniqueList = new List<ReportDataRow>();
+                var type = _reportDataManager.GetReportType(reportData);
+                var reportExceptions = _cache.GetExceptions(type);
 
-                foreach (var dataRow in reportData.Rows)
+                foreach (var reportDataRow in reportData.Rows)
                 {
                     var rowDuplicated = false;
 
-                    var customerId = _reportDataManager.GetValueForCustomerId(reportData, dataRow);
-                    var lenderId = _reportDataManager.GetValueForLenderId(reportData, dataRow);
-                    var loanDate = _reportDataManager.GetValueForLoanDate(reportData, dataRow);
+                    var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
+                    var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
+                    var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
 
                     foreach (var uniqueRow in uniqueList)
                     {
@@ -162,17 +165,19 @@ namespace LeadsImporter.Lib.Sql
 
                     if (rowDuplicated)
                     {
-                        var type = _reportDataManager.GetReportType(reportData);
-                        var leadId = _reportDataManager.GetValueForLeadId(reportData, dataRow);
-                        var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, dataRow);
+                        var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
+                        var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
                         var exceptionDesc = $"LeadId[{leadId}]";
                         duplicates.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "DUPLICATE", exceptionDesc));
+                        reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = $"DUPLICATE: {exceptionDesc}" });
                     }
                     else
                     {
-                        uniqueList.Add(dataRow);
+                        uniqueList.Add(reportDataRow);
                     }
                 }
+
+                _cache.StoreExceptions(type, reportExceptions);
 
                 return new ReportData()
                 {
@@ -183,7 +188,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlDataChecker >>> GetDuplicatesInNewDataSet: {ex.Message}");
+                _logger.AddError($"SqlDataChecker >>> GetDuplicatesInNewDataSet:", ex);
             }
 
             return null;
@@ -213,7 +218,7 @@ namespace LeadsImporter.Lib.Sql
             }
             catch (Exception ex)
             {
-                _logger.AddError($"SqlDataChecker >>> InExceptionsList: {ex.Message}");
+                _logger.AddError($"SqlDataChecker >>> InExceptionsList:", ex);
             }
 
             return false;
