@@ -46,7 +46,7 @@ namespace LeadsImporter.Lib.Report
 
         #region GET VALUE
         public string GetValueForLeadId(ReportData reportData, ReportDataRow reportDataRow)
-        {
+        {   
             try
             {
                 return GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LeadIdColumnName);
@@ -56,7 +56,7 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddError("ReportDataManager >>> GetValueForLeadId", ex);
             }
 
-            return null;
+            return null;            
         }
 
         public string GetValueForCustomerId(ReportData reportData, ReportDataRow reportDataRow)
@@ -70,7 +70,7 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddError($"ReportDataManager >>> GetValueForCustomerId:", ex);
             }
 
-            return null;
+            return null;            
         }
 
         public string GetValueForLenderId(ReportData reportData, ReportDataRow reportDataRow)
@@ -84,7 +84,7 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddError($"ReportDataManager >>> GetValueForLenderId:", ex);
             }
 
-            return null;
+            return null;            
         }
 
         public DateTime GetValueForLoanDate(ReportData reportData, ReportDataRow reportDataRow)
@@ -98,11 +98,11 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddError($"ReportDataManager >>> GetValueForLoanDate:", ex);
             }
 
-            return DateTime.MinValue;
+            return DateTime.MinValue;            
         }
 
         public DateTime GetValueForLeadCreated(ReportData reportData, ReportDataRow reportDataRow)
-        {
+        {   
             try
             {
                 return DateTime.Parse(GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
@@ -112,11 +112,11 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddError($"ReportDataManager >>> GetValueForLeadCreated:", ex);
             }
 
-            return DateTime.MinValue;
+            return DateTime.MinValue;            
         }
 
         private string GetValueForColumn(ReportData reportData, ReportDataRow row, string columnName)
-        {
+        {                                   
             try
             {
                 var columnIndex = GetColumnIndex(reportData, columnName);
@@ -127,7 +127,7 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddError($"ReportDataManager >>> GetValueForColumn:", ex);
             }
 
-            return null;
+            return null;            
         }
         #endregion
 

@@ -145,6 +145,8 @@ namespace LeadsImporter.Lib.Validation
                 var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
                 foreach (var reportDataRow in reportData.Rows)
                 {
+                    AreKeyColumnsValid(reportData, reportDataRow, newSqlExceptions, reportExceptions);
+
                     if(!_sqlDataChecker.InExceptionsList(reportData, reportDataRow, existingSqlExceptions))
                     {
                         ValidateRow(reportData, reportDataRow, validations, correctedReportData, newSqlExceptions, reportExceptions);
@@ -162,6 +164,34 @@ namespace LeadsImporter.Lib.Validation
             return null;
         }
 
+        private bool AreKeyColumnsValid(ReportData reportData, ReportDataRow reportDataRow, ICollection<SqlDataExceptionObject> newSqlExceptions, ReportDataExceptions reportExceptions)
+        {
+            var valid = true;
+
+            var type = _reportDataManager.GetReportType(reportData);
+            var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
+
+            var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
+            if (string.IsNullOrWhiteSpace(leadId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LeadId" });
+
+            var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
+            if (string.IsNullOrWhiteSpace(customerId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid CustomerId" });
+
+            var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
+            if (string.IsNullOrWhiteSpace(lenderId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LenderId" });
+
+            var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
+            if (loanDate == DateTime.MinValue) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LoanDate" });
+
+            if (string.IsNullOrWhiteSpace(leadId) || string.IsNullOrWhiteSpace(customerId) || string.IsNullOrWhiteSpace(lenderId) || loanDate == DateTime.MinValue)
+            {
+                newSqlExceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", "Invalid LeadId/CustomerId/LenderId/LoanDate"));
+                valid = false;
+            }
+
+            return valid;
+        }
+
         private void ValidateRow(ReportData reportData, ReportDataRow reportDataRow, IReadOnlyCollection<Validation> validations, 
             ReportData correctedReportData, ICollection<SqlDataExceptionObject> newSqlExceptions, ReportDataExceptions reportExceptions)
         {
@@ -171,24 +201,10 @@ namespace LeadsImporter.Lib.Validation
 
                 var type = _reportDataManager.GetReportType(reportData);
                 var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
-
                 var leadId = _reportDataManager.GetValueForLeadId(reportData, reportDataRow);
-                if (string.IsNullOrWhiteSpace(leadId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LeadId" });
-
                 var customerId = _reportDataManager.GetValueForCustomerId(reportData, reportDataRow);
-                if (string.IsNullOrWhiteSpace(customerId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid CustomerId" });
-
                 var lenderId = _reportDataManager.GetValueForLenderId(reportData, reportDataRow);
-                if (string.IsNullOrWhiteSpace(lenderId)) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LenderId" });
-
                 var loanDate = _reportDataManager.GetValueForLoanDate(reportData, reportDataRow);
-                if (loanDate == DateTime.MinValue) reportExceptions.Rows.Add(new ReportDataRowExceptions() { Data = reportDataRow.Data, Exception = "Invalid LoanDate" });
-
-                if (leadId == null || customerId == null || lenderId == null || loanDate == DateTime.MinValue)
-                {
-                    newSqlExceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", "Invalid LeadId/CustomerId/LenderId/LoanDate"));
-                    anyException = true;
-                }
                 
                 for (var index = 0; index < reportData.Headers.Count; index++)
                 {
