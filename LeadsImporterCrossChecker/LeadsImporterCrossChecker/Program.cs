@@ -25,6 +25,9 @@ namespace LeadsImporterCrossChecker
             //Validation
             Validations(aquariumNotIn, sqlNotIn, proclaimNotIn);
 
+            //File Output
+            FileOutput(aquariumNotIn, sqlNotIn, proclaimNotIn);
+
             Console.WriteLine();
             Console.WriteLine("==============================");
             Console.WriteLine("Done!");
@@ -115,13 +118,29 @@ namespace LeadsImporterCrossChecker
             Console.WriteLine(test3Correct);
             Console.ForegroundColor = ConsoleColor.White;
 
-            //3. All leads from Proclaim needs to be in the SQL
+            //4. All leads from Proclaim needs to be in the SQL
             var t4 = "Test 4 - All leads from Proclaim are in the SQL";
             Console.Write(t4 + new string('.', offset - t4.Length) + " ");
             Console.ForegroundColor = proclaim.Set2.Count > 0 ? ConsoleColor.Red : ConsoleColor.Green;
-            var test4Correct = aquarium.Set1.Count > 0 ? "FAILED" : "PASSED";
+            var test4Correct = proclaim.Set2.Count > 0 ? "FAILED" : "PASSED";
             Console.WriteLine(test4Correct);
             Console.ForegroundColor = ConsoleColor.White;
+        }
+        #endregion
+
+        #region FILE OUTPUT
+        private static void FileOutput(CheckOutput aquarium, CheckOutput sql, CheckOutput proclaim)
+        {
+            Console.Write("Output file...");
+            File.WriteAllLines("_Aquarium-NotIn-SQL.txt", aquarium.Set1);
+            File.WriteAllLines("_Aquarium-NotIn-Proclaim.txt", aquarium.Set2);
+
+            File.WriteAllLines("_SQL-NotIn-Aquarium.txt", sql.Set1);
+            File.WriteAllLines("_SQL-NotIn-Proclaim.txt", sql.Set2);
+
+            File.WriteAllLines("_Proclaim-NotIn-Aquarium.txt", proclaim.Set1);
+            File.WriteAllLines("_Proclaim-NotIn-SQL.txt", proclaim.Set2);
+            Console.WriteLine("Completed!");
         }
         #endregion
 
