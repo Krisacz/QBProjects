@@ -145,12 +145,19 @@ namespace LeadsImporter.Lib.Validation
                 var correctedReportData = new ReportData() { QueryId = reportData.QueryId, Headers = reportData.Headers, Rows = new List<ReportDataRow>() };
                 foreach (var reportDataRow in reportData.Rows)
                 {
-                    AreKeyColumnsValid(reportData, reportDataRow, newSqlExceptions, reportExceptions);
+                    var inExceptionList = _sqlDataChecker.InExceptionsList(reportData, reportDataRow, existingSqlExceptions);
+                    if (inExceptionList) continue;
 
-                    if(!_sqlDataChecker.InExceptionsList(reportData, reportDataRow, existingSqlExceptions))
+                    var sqlException = AreKeyColumnsValid(reportData, reportDataRow, reportExceptions);                   
+
+                    if (sqlException == null)
                     {
                         ValidateRow(reportData, reportDataRow, validations, correctedReportData, newSqlExceptions, reportExceptions);
                     }
+                    else if(sqlException != null)
+                    {
+                        newSqlExceptions.Add(sqlException);
+                    }                    
                 }
 
                 _cache.StoreExceptions(_reportDataManager.GetReportType(reportData), reportExceptions);
@@ -164,10 +171,8 @@ namespace LeadsImporter.Lib.Validation
             return null;
         }
 
-        private bool AreKeyColumnsValid(ReportData reportData, ReportDataRow reportDataRow, ICollection<SqlDataExceptionObject> newSqlExceptions, ReportDataExceptions reportExceptions)
-        {
-            var valid = true;
-
+        private SqlDataExceptionObject AreKeyColumnsValid(ReportData reportData, ReportDataRow reportDataRow, ReportDataExceptions reportExceptions)
+        { 
             var type = _reportDataManager.GetReportType(reportData);
             var leadCreated = _reportDataManager.GetValueForLeadCreated(reportData, reportDataRow);
 
@@ -185,11 +190,10 @@ namespace LeadsImporter.Lib.Validation
 
             if (string.IsNullOrWhiteSpace(leadId) || string.IsNullOrWhiteSpace(customerId) || string.IsNullOrWhiteSpace(lenderId) || loanDate == DateTime.MinValue)
             {
-                newSqlExceptions.Add(new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", "Invalid LeadId/CustomerId/LenderId/LoanDate"));
-                valid = false;
+                return new SqlDataExceptionObject(type, leadId, customerId, lenderId, loanDate, leadCreated, "VALIDATION", "Invalid LeadId/CustomerId/LenderId/LoanDate");
             }
 
-            return valid;
+            return null;
         }
 
         private void ValidateRow(ReportData reportData, ReportDataRow reportDataRow, IReadOnlyCollection<Validation> validations, 
