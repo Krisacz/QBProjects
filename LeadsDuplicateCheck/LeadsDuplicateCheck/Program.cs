@@ -12,7 +12,9 @@ namespace LeadsDuplicateCheck
     {
         static void Main(string[] args)
         {
+            Console.ForegroundColor = ConsoleColor.White;
             var start = DateTime.Now;
+
             var logger = new ConsoleLogger();                                           //Console error/info Logger
             var setting = SettingsReader.Read(logger);                                  //Settings 
             var aquarium = new AquariumWebService(logger, setting);                     //Aquarium ws wrapper
@@ -25,9 +27,33 @@ namespace LeadsDuplicateCheck
             var duplicates = deduper.GetDuplicates(aquariumData, proclaimData);         //Get duplicates
             var outputWriter = new OutputWriter(logger, setting);                       //File output writer
             outputWriter.WriteAll(duplicates, aquariumDataFlat);                        //Write all duplicated in csv file
-            //TODO Console Summary 
+
             var end = DateTime.Now;
 
+
+            //TODO its not fully done needs to be checked and etc
+            Console.Clear();
+            Console.WriteLine("===== SUMMARY =====");
+            Console.Write($"Aquarium reports ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(aquariumDataFlat.Keys.Count);
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(" with total of ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(aquariumDataFlat.Values.Count);
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(" records.");
+
+            Console.Write($"Proclaim records ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(proclaimData.Count);
+            Console.ForegroundColor = ConsoleColor.White;
+
+            Console.Write($"Possible duplicates: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(duplicates.Count);
+            Console.ForegroundColor = ConsoleColor.White;
+            
             Console.WriteLine();
             Console.WriteLine("====================");
             Console.WriteLine($"Completed! [Total duration: {end-start}]");
