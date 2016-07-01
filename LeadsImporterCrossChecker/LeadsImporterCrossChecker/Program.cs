@@ -4,10 +4,26 @@ using System.IO;
 
 namespace LeadsImporterCrossChecker
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
+            var filesExist = File.Exists("a.txt") && File.Exists("s.txt");
+            if (!filesExist && (args.Length <= 0 || args[0].ToLower() != "manual"))
+            {
+                var logger = new ConsoleLogger();
+                var settings = SettingsReader.Read(logger);
+
+                //Get SQL leads
+                var sql = new SqlManager(logger, settings);
+                File.WriteAllLines("s.txt", sql.GetAllLeads());
+
+                //Get Aquarium leads
+                var aquarium = new AquariumWebService(logger, settings);
+                File.WriteAllLines("a.txt", aquarium.GetAllLeads());
+            }
+            Console.Clear();
+
             //Init
             Console.ForegroundColor = ConsoleColor.White;
 
@@ -16,6 +32,9 @@ namespace LeadsImporterCrossChecker
             var sLeads = ReadDataSet("s.txt", "SQL");            
             var pLeads = ReadDataSet("p.txt", "Proclaim");
             Console.WriteLine();
+            Console.WriteLine("(Press any key to continue)");
+            Console.WriteLine();
+            Console.ReadKey();
 
             //Checks            
             var aquariumNotIn = Check(aLeads, "Aquarium", sLeads, "SQL", pLeads, "Proclaim");
@@ -26,6 +45,7 @@ namespace LeadsImporterCrossChecker
             Validations(aquariumNotIn, sqlNotIn, proclaimNotIn);
 
             //File Output
+            Console.WriteLine();
             FileOutput(aquariumNotIn, sqlNotIn, proclaimNotIn);
 
             Console.WriteLine();
@@ -131,7 +151,7 @@ namespace LeadsImporterCrossChecker
         #region FILE OUTPUT
         private static void FileOutput(CheckOutput aquarium, CheckOutput sql, CheckOutput proclaim)
         {
-            Console.Write("Output file...");
+            Console.Write("Outputing files...");
             File.WriteAllLines("_Aquarium-NotIn-SQL.txt", aquarium.Set1);
             File.WriteAllLines("_Aquarium-NotIn-Proclaim.txt", aquarium.Set2);
 
