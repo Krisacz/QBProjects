@@ -11,10 +11,12 @@ namespace LeadsDuplicateCheck
         public string AquariumLogonAction { get; private set; }
         public string AquariumRunReportUrl { get; private set; }
         public string AquariumRunReportAction { get; private set; }
-        public List<ReportSetting> ReportIds { get; private set; } 
+        public string IgnoreFilePath { get; private set; }
+        public List<ReportSetting> ReportIds { get; private set; }
+        
 
-        public Settings(string sqlConnectionString, string aquariumUsername, string aquariumPassword, string aquariumLogonUrl, 
-            string aquariumLogonAction, string aquariumRunReportUrl, string aquariumRunReportAction, List<ReportSetting> reportIds)
+        public Settings(string sqlConnectionString, string aquariumUsername, string aquariumPassword, string aquariumLogonUrl, string aquariumLogonAction, 
+            string aquariumRunReportUrl, string aquariumRunReportAction, string ignoreFilePath, List<ReportSetting> reportIds)
         {
             SqlConnectionString = sqlConnectionString;
             AquariumUsername = aquariumUsername;
@@ -23,6 +25,7 @@ namespace LeadsDuplicateCheck
             AquariumLogonAction = aquariumLogonAction;
             AquariumRunReportUrl = aquariumRunReportUrl;
             AquariumRunReportAction = aquariumRunReportAction;
+            IgnoreFilePath = ignoreFilePath;
             ReportIds = reportIds;
         }
     }

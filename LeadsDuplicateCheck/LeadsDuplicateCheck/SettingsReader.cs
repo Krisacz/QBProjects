@@ -33,12 +33,15 @@ namespace LeadsDuplicateCheck
                 var aquariumRunReportAction = ConfigurationManager.AppSettings["AquariumRunReportAction"];
                 logger.AddInfo($"SettingsReader >>> Read: AquariumRunReportAction: {aquariumRunReportAction}");
 
+                var ignoreFilePath = ConfigurationManager.AppSettings["IgnoreFilePath"];
+                logger.AddInfo($"SettingsReader >>> Read: IgnoreFilePath: {ignoreFilePath}");
+
                 var reportIds = ReportSettings(logger);
                 logger.AddInfo($"SettingsReader >>> Read: ReportIds: Found {reportIds.Count} report ids");
 
                 logger.AddInfo("SettingsReader >>> Read: Config file valid.");
-                return new Settings(sqlConnectionString, aquariumUsername, aquariumPassword,
-                    aquariumLogonUrl, aquariumLogonAction, aquariumRunReportUrl, aquariumRunReportAction, reportIds);
+                return new Settings(sqlConnectionString, aquariumUsername, aquariumPassword, aquariumLogonUrl, 
+                    aquariumLogonAction, aquariumRunReportUrl, aquariumRunReportAction, ignoreFilePath, reportIds);
             }
             catch (Exception ex)
             {

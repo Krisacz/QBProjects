@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 
 namespace LeadsDuplicateCheck
 {
@@ -26,16 +24,20 @@ namespace LeadsDuplicateCheck
                 {
                     string.Empty,
                     "Proclaim-CaseRef",
+                    "Proclaim-FirstName",
                     "Proclaim-Surname",
                     "Proclaim-Postcde",
                     "Proclaim-DOB",
+                    "Proclaim-Lender",
                     "Proclaim-URSCLoanDate",
-                    "Proclaim-RPPILoanDate"
+                    "Proclaim-RPPILoanDate",
                 };
-
+                
                 var types = _setting.ReportIds.Select(x => x.Type).ToList();
                 foreach (var type in types)
                 {
+                    if(duplicates.All(x => x.AquariumLeadData.ReportType != type)) continue;
+
                     var csvLines = new List<string>();
                     var headers = aquariumDataFlat[type].Headers;
                     var headersLine = $"{ListToString(headers)},{ListToString(additionalHeaders)}";
@@ -63,9 +65,11 @@ namespace LeadsDuplicateCheck
         {
             var str = string.Empty;
             str += p.CaseRef;
+            str += "," + p.FirstName;
             str += "," + p.Surname;
             str += "," + p.Postcode;
             str += "," + DateNullToString(p.Dob);
+            str += "," + p.Lender;
             str += "," + DateNullToString(p.UrscLoanDate);
             str += "," + DateNullToString(p.RppiLoanDate);
 

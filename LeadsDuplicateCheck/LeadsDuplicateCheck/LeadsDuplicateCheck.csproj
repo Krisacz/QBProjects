@@ -46,9 +46,11 @@
   <ItemGroup>
     <Compile Include="AquariumWebService.cs" />
     <Compile Include="AquariumLeadData.cs" />
+    <Compile Include="Cleaner.cs" />
     <Compile Include="Deduper.cs" />
     <Compile Include="DataParser.cs" />
     <Compile Include="Duplicate.cs" />
+    <Compile Include="Excluder.cs" />
     <Compile Include="OutputWriter.cs" />
     <Compile Include="ProclaimClaimData.cs" />
     <Compile Include="ConsoleLogger.cs" />

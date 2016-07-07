@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LeadsDuplicateCheck
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.ForegroundColor = ConsoleColor.White;
             var start = DateTime.Now;
@@ -18,46 +13,50 @@ namespace LeadsDuplicateCheck
             var logger = new ConsoleLogger();                                           //Console error/info Logger
             var setting = SettingsReader.Read(logger);                                  //Settings 
             var aquarium = new AquariumWebService(logger, setting);                     //Aquarium ws wrapper
-            var aquariumDataFlat = aquarium.GetAllAquariumData();                       //Simplified flat (raw) data from Aquarium 
+            var aquariumDataFlat = aquarium.GetAllAquariumData();                       //### Simplified flat (raw) data from Aquarium 
+            var cleaner = new Cleaner(logger);                                          //Data cleaner
+            cleaner.Cleanse(aquariumDataFlat);                                          //### Clean data
             var dataParser = new DataParser(logger, setting);                           //Data parser
-            var aquariumData = dataParser.ParseToAquariumLeadData(aquariumDataFlat);    //Aquarium data (to be user in Deduper)
+            var aquariumData = dataParser.ParseToAquariumLeadData(aquariumDataFlat);    //### Aquarium data (to be user in Deduper)
             var sqlManager = new SqlManager(logger, setting);                           //Sql wrapper to retrieve Proclaim data
-            var proclaimData = sqlManager.GetAllProclaimData();                         //Proclaim data (to be user in Deduper)
+            var proclaimData = sqlManager.GetAllProclaimData();                         //### Proclaim data (to be user in Deduper)
             var deduper = new Deduper(logger);                                          //Deduper
-            var duplicates = deduper.GetDuplicates(aquariumData, proclaimData);         //Get duplicates
+            var duplicates = deduper.GetDuplicates(aquariumData, proclaimData);         //### Get duplicates
+            var excluder = new Excluder(logger, setting).Read();                        //Excluder (for excluding ignored Proclaim claims)
+            var withoutIgnored = excluder.Exclude(duplicates);                          //### Duplicates without excluded(ignored) claims
             var outputWriter = new OutputWriter(logger, setting);                       //File output writer
-            outputWriter.WriteAll(duplicates, aquariumDataFlat);                        //Write all duplicated in csv file
+            outputWriter.WriteAll(withoutIgnored, aquariumDataFlat);                    //### Write all duplicated in csv file
 
             var end = DateTime.Now;
 
-
-            //TODO its not fully done needs to be checked and etc
             Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("===== SUMMARY =====");
-            Console.Write($"Aquarium reports ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(aquariumDataFlat.Keys.Count);
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write(" with total of ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(aquariumDataFlat.Values.Count);
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" records.");
-
-            Console.Write($"Proclaim records ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(proclaimData.Count);
             Console.ForegroundColor = ConsoleColor.White;
 
-            Console.Write($"Possible duplicates: ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(duplicates.Count);
-            Console.ForegroundColor = ConsoleColor.White;
-            
-            Console.WriteLine();
+            WriteSummaryLine("Aquarium Reports: ", aquariumDataFlat?.Keys.Count.ToString() ?? "0");
+            WriteSummaryLine("Aquarium Total Records: ", aquariumDataFlat?.Values.Sum(x=>x.Rows.Count).ToString() ?? "0");
+            WriteSummaryLine("Proclaim Records: ", proclaimData?.Count.ToString() ?? "0");
+            WriteSummaryLine("Possible duplicates: ", withoutIgnored?.Count.ToString() ?? "0");
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("====================");
-            Console.WriteLine($"Completed! [Total duration: {end-start}]");
+            Console.WriteLine("Completed!");
+            Console.WriteLine($"[Total duration: {end-start}]");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("(Press any key to exit)");
             Console.ReadKey();
+        }
+
+        private static void WriteSummaryLine(string text, string value)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(text);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(value);
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

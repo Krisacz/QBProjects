@@ -33,8 +33,8 @@ namespace LeadsDuplicateCheck
                         while (rdr.Read())
                         {
                             var pd = new ProclaimClaimData(_logger)
-                                .Parse(rdr["CaseRef"].ToString(), rdr["Surname"].ToString(), rdr["Postcode"].ToString(),
-                                    rdr["DOB"].ToString(), rdr["URSCLoanDate"].ToString(), rdr["RPPILoanDate"].ToString());
+                                .Parse(rdr["CaseRef"].ToString(), rdr["FirstName"].ToString(), rdr["Surname"].ToString(), rdr["Postcode"].ToString(),
+                                    rdr["DOB"].ToString(), rdr["URSCLoanDate"].ToString(), rdr["RPPILoanDate"].ToString(), rdr["Lender"].ToString());
                             list.Add(pd);
                         }
                     }
