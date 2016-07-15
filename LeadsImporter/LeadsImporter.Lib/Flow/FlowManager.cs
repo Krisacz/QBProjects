@@ -174,7 +174,8 @@ namespace LeadsImporter.Lib.Flow
 
                 foreach (var reportDataRow in reportData.Rows)
                 {
-                    var line = string.Join(",", reportDataRow.Data);
+                    var fixedRow = CustomFixer.Fix(reportDataRow.Data, type);
+                    var line = string.Join(",", fixedRow);
                     csv.Add(line);
                 }
                 
@@ -201,7 +202,8 @@ namespace LeadsImporter.Lib.Flow
                 csv.Add(string.Join(",", reportData.Headers));
                 foreach (var reportDataRow in reportData.Rows)
                 {
-                    var line = string.Join(",", reportDataRow.Data);
+                    var fixedRow = CustomFixer.Fix(reportDataRow.Data, type);
+                    var line = string.Join(",", fixedRow);
                     line += $",{reportDataRow.Exception}"; 
                     csv.Add(line);
                 }

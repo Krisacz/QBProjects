@@ -74,6 +74,7 @@
     <Compile Include="Sql\SqlDataExceptionObject.cs" />
     <Compile Include="Sql\SqlDataUpdater.cs" />
     <Compile Include="Sql\SqlManager.cs" />
+    <Compile Include="Validation\CustomFixer.cs" />
     <Compile Include="Validation\FieldType.cs" />
     <Compile Include="Validation\CharactersValidator.cs" />
     <Compile Include="Validation\Validation.cs" />
