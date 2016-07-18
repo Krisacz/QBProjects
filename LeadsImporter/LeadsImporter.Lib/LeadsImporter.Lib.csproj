@@ -51,6 +51,7 @@
     <Compile Include="Cache\ICache.cs" />
     <Compile Include="Cache\InMemoryCache.cs" />
     <Compile Include="DataAccessor\TestDataAccessor.cs" />
+    <Compile Include="Executer\ConsoleExecuter.cs" />
     <Compile Include="Executer\IExecuter.cs" />
     <Compile Include="Executer\TimerExecuter.cs" />
     <Compile Include="Flow\FlowManager.cs" />

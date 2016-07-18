@@ -53,7 +53,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError("ReportDataManager >>> GetValueForLeadId", ex);
+                _logger.AddDetailedError("ReportDataManager >>> GetValueForLeadId", ex);
             }
 
             return null;            
@@ -63,11 +63,13 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                return GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).CustomerIdColumnName);
+                var reportSettings = _reportsSettings.GetReportSettings(reportData.QueryId);
+                var customerIdColumnName = reportSettings.CustomerIdColumnName;
+                return GetValueForColumn(reportData, reportDataRow, customerIdColumnName);
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForCustomerId:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> GetValueForCustomerId:", ex);
             }
 
             return null;            
@@ -77,11 +79,13 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                return GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LenderIdColumnName);
+                var reportSettings = _reportsSettings.GetReportSettings(reportData.QueryId);
+                var lenderIdColumnName = reportSettings.LenderIdColumnName;
+                return GetValueForColumn(reportData, reportDataRow, lenderIdColumnName);
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForLenderId:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> GetValueForLenderId:", ex);
             }
 
             return null;            
@@ -89,13 +93,17 @@ namespace LeadsImporter.Lib.Report
 
         public DateTime GetValueForLoanDate(ReportData reportData, ReportDataRow reportDataRow)
         {
+            var valueForColumn = string.Empty;
             try
             {
-                return DateTime.Parse(GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LoanDateColumnName));
+                var reportSettings = _reportsSettings.GetReportSettings(reportData.QueryId);
+                var loanDateColumnName = reportSettings.LoanDateColumnName;
+                valueForColumn = GetValueForColumn(reportData, reportDataRow, loanDateColumnName);
+                return DateTime.Parse(valueForColumn);
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForLoanDate:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> GetValueForLoanDate[{valueForColumn}]:", ex);
             }
 
             return DateTime.MinValue;            
@@ -105,11 +113,13 @@ namespace LeadsImporter.Lib.Report
         {   
             try
             {
-                return DateTime.Parse(GetValueForColumn(reportData, reportDataRow, _reportsSettings.GetReportSettings(reportData.QueryId).LeadCreatedColumnName));
+                var reportSettings = _reportsSettings.GetReportSettings(reportData.QueryId);
+                var leadCreatedColumnName = reportSettings.LeadCreatedColumnName;
+                return DateTime.Parse(GetValueForColumn(reportData, reportDataRow, leadCreatedColumnName));
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForLeadCreated:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> GetValueForLeadCreated:", ex);
             }
 
             return DateTime.MinValue;            
@@ -124,7 +134,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetValueForColumn:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> GetValueForColumn:", ex);
             }
 
             return null;            
@@ -140,7 +150,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetReportType:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> GetReportType:", ex);
             }
 
             return null;
@@ -220,7 +230,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetExistingReportDataRowIndex:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> GetExistingReportDataRowIndex:", ex);
             }
 
             return null;
@@ -237,7 +247,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> GetColumnIndex:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> GetColumnIndex:", ex);
             }
             
             return -1;
@@ -260,7 +270,7 @@ namespace LeadsImporter.Lib.Report
             }
             catch (Exception ex)
             {
-                _logger.AddError($"ReportDataManager >>> AddHeaderIfNotExist:", ex);
+                _logger.AddDetailedError($"ReportDataManager >>> AddHeaderIfNotExist:", ex);
             }
         }
         #endregion

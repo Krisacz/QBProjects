@@ -25,6 +25,26 @@ namespace LeadsImporter.Lib.Log
             Console.WriteLine(txt);
         }
 
+        public void AddDetailedError(string error, Exception exception)
+        {
+            if (!EnableDetailedLog) return;
+            var dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var txt = $"{dt} [ERROR]\t{error} ";
+            if (exception == null)
+            {
+                txt += Environment.NewLine;
+            }
+            else
+            {
+                txt += $"Error Message: {exception.Message}";
+                if (exception.InnerException != null && !string.IsNullOrWhiteSpace(exception.InnerException.ToString()))
+                {
+                    txt += $"\t\tInnerException: {exception.InnerException}";
+                }
+            }
+            Console.WriteLine(txt);
+        }
+
         public void AddInfo(string info)
         {
             var dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

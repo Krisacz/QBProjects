@@ -86,7 +86,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                _logger.AddDetailedLog("ReportsSettings >>> GetReportSettings: Getting report settings for type/sequence...");
+                //_logger.AddDetailedLog("ReportsSettings >>> GetReportSettings: Getting report settings for type/sequence...");
                 return _all.First(reportSettings => reportSettings.Type == type && reportSettings.ExecutionSequnece == sequence);
             }
             catch (Exception ex)
@@ -101,7 +101,7 @@ namespace LeadsImporter.Lib.Report
         {
             try
             {
-                _logger.AddDetailedLog("ReportsSettings >>> GetReportSettings: Getting report settings for query id...");
+                //_logger.AddDetailedLog("ReportsSettings >>> GetReportSettings: Getting report settings for query id...");
                 return _all.First(reportSettings => reportSettings.QueryId == queryId);
             }
             catch (Exception ex)

@@ -10,9 +10,11 @@
         public string AquariumLogonAction { get; private set; }
         public string AquariumRunReportUrl { get; private set; }
         public string AquariumRunReportAction { get; private set; }
+        public bool SupressSqlUpdates { get; private set; }
+        public bool DetailedLog { get; private set; }
 
-        public Settings(string sqlConnectionString, string poolingTimeInSec, string aquariumUsername, string aquariumPassword, 
-            string aquariumLogonUrl, string aquariumLogonAction, string aquariumRunReportUrl, string aquariumRunReportAction)
+        public Settings(string sqlConnectionString, string poolingTimeInSec, string aquariumUsername, string aquariumPassword, string aquariumLogonUrl, 
+            string aquariumLogonAction, string aquariumRunReportUrl, string aquariumRunReportAction, bool supressSqlUpdates, bool detailedLog)
         {
             SqlConnectionString = sqlConnectionString;
             PoolingTimeInSec = poolingTimeInSec;
@@ -22,6 +24,8 @@
             AquariumLogonAction = aquariumLogonAction;
             AquariumRunReportUrl = aquariumRunReportUrl;
             AquariumRunReportAction = aquariumRunReportAction;
+            SupressSqlUpdates = supressSqlUpdates;
+            DetailedLog = detailedLog;
         }
     }
 }

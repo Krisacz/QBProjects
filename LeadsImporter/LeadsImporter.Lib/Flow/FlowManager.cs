@@ -168,6 +168,7 @@ namespace LeadsImporter.Lib.Flow
         {
             try
             {
+                _logger.AddInfo($"FlowManager >>> SaveReport[{type}]: Saving file...");
                 var reportData = _cache.Get(type);
                 var csv = new List<string>();
                 if(reportData.Rows.Count == 0) return;

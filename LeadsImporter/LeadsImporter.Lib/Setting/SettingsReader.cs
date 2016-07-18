@@ -36,9 +36,17 @@ namespace LeadsImporter.Lib.Setting
                 var aquariumRunReportAction = ConfigurationManager.AppSettings["AquariumRunReportAction"];
                 logger.AddInfo($"SettingsReader >>> Read: AquariumRunReportAction: {aquariumRunReportAction}");
 
+                var supressSqlUpdatesStr = ConfigurationManager.AppSettings["SupressSqlUpdates"];
+                logger.AddInfo($"SettingsReader >>> Read: SupressSqlUpdates: {supressSqlUpdatesStr}");
+                var supressSqlUpdates = supressSqlUpdatesStr.ToLower().Equals("true");
+
+                var detailedLogStr = ConfigurationManager.AppSettings["DetailedLog"];
+                logger.AddInfo($"SettingsReader >>> Read: DetailedLog: {detailedLogStr}");
+                var detailedLog = detailedLogStr.ToLower().Equals("true");
+
                 logger.AddInfo("SettingsReader >>> Read: Config file valid.");
-                return new Settings(sqlConnectionString, poolingTimeInSec, aquariumUsername, aquariumPassword, 
-                    aquariumLogonUrl, aquariumLogonAction, aquariumRunReportUrl, aquariumRunReportAction);
+                return new Settings(sqlConnectionString, poolingTimeInSec, aquariumUsername, aquariumPassword, aquariumLogonUrl, 
+                    aquariumLogonAction, aquariumRunReportUrl, aquariumRunReportAction, supressSqlUpdates, detailedLog);
             }
             catch (Exception ex)
             {

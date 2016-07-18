@@ -144,6 +144,7 @@ namespace LeadsImporter.Lib.Sql
         {
             try
             {
+                if(_settings.SupressSqlUpdates) return;
                 _logger.AddInfo($"SqlManager >>> InsertRecord: Inserting new data row...");
                 using (var conn = new SqlConnection(_settings.SqlConnectionString))
                 {
@@ -187,6 +188,7 @@ namespace LeadsImporter.Lib.Sql
         {
             try
             {
+                if (_settings.SupressSqlUpdates) return;
                 _logger.AddInfo($"SqlManager >>> InsertException: Inserting new exception row...");
                 using (var conn = new SqlConnection(_settings.SqlConnectionString))
                 {

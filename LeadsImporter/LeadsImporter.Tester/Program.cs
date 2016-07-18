@@ -1,8 +1,5 @@
 ﻿using System;
 using LeadsImporter.Lib.AppController;
-using LeadsImporter.Lib.DataAccessor;
-using LeadsImporter.Lib.Log;
-using LeadsImporter.Lib.Setting;
 using Topshelf;
 
 namespace LeadsImporter.Tester
@@ -11,7 +8,7 @@ namespace LeadsImporter.Tester
     {
         private static void Main(string[] args)
         {
-            Run(RunType.ConsoleLive);
+            Run(RunType.TopShelfLive);
 
             /*
             var consoleLogger = new ConsoleLogger();
@@ -55,7 +52,8 @@ namespace LeadsImporter.Tester
 
                         var app = new ConsoleAppController();
                         app.Start();
-
+                        app.Stop();
+                        Console.WriteLine("Finished. Press ESC key to EXIT.");
                         do
                         {
                             while (!Console.KeyAvailable)

@@ -100,7 +100,7 @@ namespace LeadsImporter.Tests
                         "https://aqnet.aquarium-software.com/AquariumSDK/UserManagement.asmx",
                         "https://www.aquarium-software.com/AquariumSDK/Logon",
                         "https://aqnet.aquarium-software.com/AquariumSDK/ReportManagement.asmx",
-                        "https://www.aquarium-software.com/AquariumSDK/RunReport");
+                        "https://www.aquarium-software.com/AquariumSDK/RunReport", true, false);
                 }
             }
 

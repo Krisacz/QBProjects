@@ -37,7 +37,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddDetailedLog($"InMemoryCache >>> Store: Caching data for {type}...");
+                //_logger.AddDetailedLog($"InMemoryCache >>> Store: Caching data for {type}...");
                 if (_data.ContainsKey(type))
                 {
                     _data[type] = data;
@@ -57,7 +57,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddDetailedLog($"InMemoryCache >>> Store: Caching data for {type}...");
+                //_logger.AddDetailedLog($"InMemoryCache >>> Store: Caching data for {type}...");
                 if (_exceptions.ContainsKey(type))
                 {
                     _exceptions[type] = exceptions;

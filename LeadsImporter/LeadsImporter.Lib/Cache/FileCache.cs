@@ -39,7 +39,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddDetailedLog($"FileCache >>> Store: Caching data for {type}...");
+                //_logger.AddDetailedLog($"FileCache >>> Store: Caching data for {type}...");
                 Directory.CreateDirectory(_tempCachePath);
                 var serializer = new XmlSerializer(typeof(ReportData));
                 var xmlWriterSettings = new XmlWriterSettings {Indent = true, IndentChars = "  ", NewLineChars = "\r\n", NewLineHandling = NewLineHandling.Replace };
@@ -63,7 +63,7 @@ namespace LeadsImporter.Lib.Cache
         {
             try
             {
-                _logger.AddDetailedLog($"FileCache >>> Store: Caching data for {type}...");
+                //_logger.AddDetailedLog($"FileCache >>> Store: Caching data for {type}...");
                 Directory.CreateDirectory(_tempCachePath);
                 var serializer = new XmlSerializer(typeof(ReportDataExceptions));
                 var xmlWriterSettings = new XmlWriterSettings { Indent = true, IndentChars = "  ", NewLineChars = "\r\n", NewLineHandling = NewLineHandling.Replace };

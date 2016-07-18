@@ -16,8 +16,10 @@ namespace LeadsImporter.Lib.AppController
 
         public WinServiceAppController()
         {
-            var logger = new FileLogger() {EnableDetailedLog = false};
+            var logger = new FileLogger();
             var settings = SettingsReader.Read(logger);
+            logger.EnableDetailedLog = settings.DetailedLog;
+
             var reportsSettings = new ReportsSettings(logger).ReadAll();
             var reportDataManager = new ReportDataManager(logger, reportsSettings);
             var dataAccessor = new AquariumWebService(logger, settings);
