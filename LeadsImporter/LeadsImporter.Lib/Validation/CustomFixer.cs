@@ -1,65 +1,57 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using LeadsImporter.Lib.Report;
 
 namespace LeadsImporter.Lib.Validation
 {
     public static class CustomFixer
     {
-        public static IEnumerable<string> Fix(List<string> dataRow, string type)
+        public static IEnumerable<string> Fix(IEnumerable<string> dataRow)
         {
-            var afterFix1 = DateExecutedFix(dataRow, type);
-            var afterFix2 = DobFix(afterFix1 ?? dataRow, type);
-            //any other fixes if needed e.g. var afterFix2 = FixSomething(afterFix1, type);
-            //....
-            return afterFix2 ?? dataRow;
+            var fixedDataRow1 = FixDates(dataRow);
+            return fixedDataRow1;
         }
 
-        private static List<string> DobFix(IEnumerable<string> dataRow, string type)
+        private static IEnumerable<string> FixDates(IEnumerable<string> dataRow)
         {
-            var fixedDataRow = new List<string>(dataRow);
-            int index;
-            switch (type.ToLower())
+            var regex = new Regex(@"\d{4}-\d{2}-\d{2}");
+            var regex2 = new Regex(@"(\d{2}/\d{2}/\d{4})");
+            var fixedDataRow = new List<string>();
+
+            foreach (var field in dataRow)
             {
-                case "ursc": index = 4; break;
-                case "rppi": index = 4; break;
-                default: return null;
+                if (regex.IsMatch(field))
+                {
+                    var regexMatch = regex.Match(field);
+                    var incorrectDateString = regexMatch.Value;
+                    var correctedDate = CorrectDate(incorrectDateString);
+                    fixedDataRow.Add(correctedDate);
+                }
+                else if (regex2.IsMatch(field))
+                {
+                    var regexMatch = regex2.Match(field);
+                    var correctDateString = regexMatch.Value;
+                    var correctedDate = correctDateString;
+                    fixedDataRow.Add(correctedDate);
+                }
+                else
+                {
+                    fixedDataRow.Add(field);
+                }
             }
-            if (fixedDataRow.Count < index) return null;
-            var oldValue = fixedDataRow[index];
-            if (oldValue.Length < 10) return null;
-
-            var d = oldValue.Substring(8, 2);
-            var m = oldValue.Substring(5, 2);
-            var y = oldValue.Substring(0, 4);
-
-            var newValue = $"{d}/{m}/{y}";
-            fixedDataRow[index] = newValue;
 
             return fixedDataRow;
         }
 
-        private static List<string> DateExecutedFix(IEnumerable<string> dataRow, string type)
+        private static string CorrectDate(string value)
         {
-            var fixedDataRow = new List<string>(dataRow);
-            int index;
-            switch (type.ToLower())
-            {
-                case "ursc": index = 77; break;
-                case "rppi": index = 64; break;
-                default: return null;
-            }
-            if (fixedDataRow.Count < index) return null;
-            var oldValue = fixedDataRow[index];
-            if (oldValue.Length < 10) return null;
-
-            var d = oldValue.Substring(8, 2);
-            var m = oldValue.Substring(5, 2);
-            var y = oldValue.Substring(0, 4);
-
-            var newValue = $"{d}/{m}/{y}";
-            fixedDataRow[index] = newValue;
-
-            return fixedDataRow;
+            //0123456789
+            //2001-01-31
+            var year = value.Substring(0, 4);
+            var month = value.Substring(5, 2);
+            var day = value.Substring(8, 2);
+            var correctedDate = $"{day}/{month}/{year}";
+            return correctedDate;
         }
     }
 }
