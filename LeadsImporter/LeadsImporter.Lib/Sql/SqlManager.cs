@@ -18,6 +18,24 @@ namespace LeadsImporter.Lib.Sql
             _settings = settings;
         }
 
+        #region SLQ CONNECTION CHECK
+        public bool SqlConnectionCheck()
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_settings.SqlConnectionString))
+                {
+                    connection.Open();
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        #endregion
+
         #region GET ALL EXCEPTIONS
         public List<SqlDataExceptionObject> GetAllExceptions()
         {

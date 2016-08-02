@@ -1,4 +1,5 @@
-﻿using LeadsImporter.Lib.Cache;
+﻿using System.IO;
+using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.DataAccessor;
 using LeadsImporter.Lib.Executer;
 using LeadsImporter.Lib.Flow;
@@ -12,9 +13,25 @@ namespace LeadsImporter.Lib.AppController
 {
     public class WinServiceAppController : IAppController
     {
-        private readonly IExecuter _executer;
+        private IExecuter _executer;
 
         public WinServiceAppController()
+        {
+            
+        }
+
+        public void Start()
+        {
+            Init();
+            _executer.Start();
+        }
+
+        public void Stop()
+        {
+            _executer.Stop();
+        }
+
+        private void Init()
         {
             var logger = new FileLogger();
             var settings = SettingsReader.Read(logger);
@@ -24,23 +41,14 @@ namespace LeadsImporter.Lib.AppController
             var reportDataManager = new ReportDataManager(logger, reportsSettings);
             var dataAccessor = new AquariumWebService(logger, settings);
             var sqlManager = new SqlManager(logger, settings);
-            var cache = new FileCache(logger);
+            var cache = new InMemoryCache(logger);
             var sqlDataChecker = new SqlDataChecker(reportDataManager, logger, cache);
             var sqlDataUpdater = new SqlDataUpdater(sqlManager, logger);
             var charactersValidator = new CharactersValidator(logger).Read();
             var validator = new Validator(logger, reportDataManager, sqlDataChecker, charactersValidator, cache).Read();
-            var flowManager = new FlowManager(cache, dataAccessor, sqlManager, reportDataManager, sqlDataChecker, sqlDataUpdater, validator, logger);
+            var flowManager = new FlowManager(cache, dataAccessor, sqlManager, reportDataManager, sqlDataChecker, sqlDataUpdater,
+                validator, logger);
             _executer = new TimerExecuter(logger, settings, flowManager);
-        }
-
-        public void Start()
-        {
-            _executer.Start();
-        }
-
-        public void Stop()
-        {
-            _executer.Stop();
         }
     }
 }

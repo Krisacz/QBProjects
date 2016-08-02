@@ -126,7 +126,7 @@ namespace LeadsImporterCrossChecker
             var correct = true;
             foreach (var x in aquarium.Set2) if (!InDataSet(x, aquarium.Main)) correct = false;
             Console.ForegroundColor = correct ? ConsoleColor.Green : ConsoleColor.Red;
-            var test2Correct = aquarium.Set1.Count > 0 ? "PASSED" : "FAILED";
+            var test2Correct = aquarium.Set1.Count > 0 ? "FAILED" : "PASSED";
             Console.WriteLine(test2Correct);
             Console.ForegroundColor = ConsoleColor.White;
 

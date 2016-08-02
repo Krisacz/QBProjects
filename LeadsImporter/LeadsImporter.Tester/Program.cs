@@ -8,7 +8,7 @@ namespace LeadsImporter.Tester
     {
         private static void Main(string[] args)
         {
-            Run(RunType.ConsoleLive);
+            Run(RunType.TopShelfLive);
 
             /*
             var consoleLogger = new ConsoleLogger();
@@ -36,7 +36,7 @@ namespace LeadsImporter.Tester
                                 s.WhenStarted(tc => tc.Start());
                                 s.WhenStopped(tc => tc.Stop());
                             });
-                            x.RunAsLocalSystem();
+                            x.RunAsLocalService();
                             x.SetDescription("Proclaim Leads Importer");
                             x.SetDisplayName("LeadsImporter");
                             x.SetServiceName("LeadsImporter");

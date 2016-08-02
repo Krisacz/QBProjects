@@ -45,7 +45,7 @@ namespace LeadsImporter.Lib.Executer
             try
             {
                 _logger.AddInfo("TimerExecuter >>> Stop: Stopping timer...");
-                _timer.Enabled = true;
+                _timer.Enabled = false;
             }
             catch (Exception ex)
             {
@@ -64,6 +64,14 @@ namespace LeadsImporter.Lib.Executer
         {
             try
             {
+                //SQL Connection check - if fails - do not proceed
+                if (!_flowManager.PreCheck())
+                {
+                    _logger.AddError("TimerExecuter >>> Execute: SQL Connection failed!", null);
+                    return;
+                }
+
+                //Process
                 _timer.Enabled = false;
                 _logger.AddInfo("TimerExecuter >>> Execute: (Waking up) Executing...");
 

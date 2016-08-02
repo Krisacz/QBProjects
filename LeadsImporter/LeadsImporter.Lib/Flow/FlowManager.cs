@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LeadsImporter.Lib.Cache;
 using LeadsImporter.Lib.DataAccessor;
 using LeadsImporter.Lib.Log;
@@ -39,6 +40,13 @@ namespace LeadsImporter.Lib.Flow
             _logger = logger;
         }
 
+        #region ALL CHECKS BEFORE PROCEEDING 
+        public bool PreCheck()
+        {
+            return _sqlManager.SqlConnectionCheck();
+        }
+        #endregion
+
         #region INIT
         public void Init()
         {
@@ -48,7 +56,7 @@ namespace LeadsImporter.Lib.Flow
 
                 _sqlExceptions = _sqlManager.GetAllExceptions();
                 _allData = _sqlManager.GetAllData();
-
+                
                 _newSqlExceptions = new List<SqlDataExceptionObject>();
                 _newSqlData = new List<SqlDataObject>();
             }
@@ -65,7 +73,7 @@ namespace LeadsImporter.Lib.Flow
             try
             {
                 var types = _reportDataManager.GetReportTypes();
-
+                _logger.AddInfo("Types: " + string.Join(",", types));
                 foreach (var type in types)
                 {
                     ValidateAndJoin(type);

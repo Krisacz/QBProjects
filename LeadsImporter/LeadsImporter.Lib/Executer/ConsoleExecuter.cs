@@ -29,12 +29,18 @@ namespace LeadsImporter.Lib.Executer
         {
             try
             {
-                _logger.AddInfo("TimerExecuter >>> Execute: Executing...");
+                //SQL Connection check - if fails - do not proceed
+                if (!_flowManager.PreCheck())
+                {
+                    _logger.AddError("TimerExecuter >>> Execute: SQL Connection failed!", null);
+                    return;
+                }
 
+                //Process
+                _logger.AddInfo("TimerExecuter >>> Execute: Executing...");
                 _flowManager.Init();
                 _flowManager.Process();
                 _flowManager.Output();
-
                 _logger.AddInfo("TimerExecuter >>> Execute: Finished!");
             }
             catch (Exception ex)
