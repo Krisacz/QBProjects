@@ -33,7 +33,7 @@ namespace LeadsImporterExceptionRemover
 
             Console.WriteLine($"Fetching exceptions for CustomerId = {customerId}...");
             var list = sqlManager.GetSpecificException(customerId);
-            Console.WriteLine($"Found {list.Count} exceptions.");
+            Console.WriteLine($"Found {list.Count} exception(s).");
             if (list.Count > 0)
             {
                 Console.WriteLine();
