@@ -213,7 +213,8 @@ namespace LeadsImporter.Lib.Flow
                 {
                     var fixedRow = CustomFixer.Fix(reportDataRow.Data);
                     var line = string.Join(",", fixedRow);
-                    line += $",{reportDataRow.Exception}"; 
+                    line += $",{reportDataRow.Exception}";
+                    line += $",{AquariumLink(reportData, reportDataRow)}";
                     csv.Add(line);
                 }
 
@@ -227,6 +228,13 @@ namespace LeadsImporter.Lib.Flow
             {
                 _logger.AddError($"FlowManager >>> SaveReportExceptions[{type}]:", ex);
             }
+        }
+
+        private string AquariumLink(ReportDataExceptions reportDataExceptions, ReportDataRowExceptions reportDataRow)
+        {
+            const string baseStr = "https://scripting.aquarium-software.com/default.aspx?sid=177&c=";
+            var customerId = _reportDataManager.GetValueForCustomerId(reportDataExceptions, reportDataRow);
+            return $"{baseStr}{customerId}";
         }
         #endregion
     }

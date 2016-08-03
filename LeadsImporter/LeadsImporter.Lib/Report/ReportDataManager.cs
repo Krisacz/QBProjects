@@ -75,6 +75,22 @@ namespace LeadsImporter.Lib.Report
             return null;            
         }
 
+        public string GetValueForCustomerId(ReportDataExceptions reportData, ReportDataRowExceptions reportDataRow)
+        {
+            try
+            {
+                var reportSettings = _reportsSettings.GetReportSettings(reportData.QueryId);
+                var customerIdColumnName = reportSettings.CustomerIdColumnName;
+                return GetValueForColumn(reportData, reportDataRow, customerIdColumnName);
+            }
+            catch (Exception ex)
+            {
+                _logger.AddDetailedError($"ReportDataManager >>> GetValueForCustomerId:", ex);
+            }
+
+            return null;
+        }
+
         public string GetValueForLenderId(ReportData reportData, ReportDataRow reportDataRow)
         {
             try
@@ -138,6 +154,21 @@ namespace LeadsImporter.Lib.Report
             }
 
             return null;            
+        }
+
+        private string GetValueForColumn(ReportDataExceptions reportData, ReportDataRowExceptions row, string columnName)
+        {
+            try
+            {
+                var columnIndex = GetColumnIndex(reportData, columnName);
+                return row.Data[columnIndex];
+            }
+            catch (Exception ex)
+            {
+                _logger.AddDetailedError($"ReportDataManager >>> GetValueForColumn:", ex);
+            }
+
+            return null;
         }
         #endregion
 
@@ -250,6 +281,23 @@ namespace LeadsImporter.Lib.Report
                 _logger.AddDetailedError($"ReportDataManager >>> GetColumnIndex:", ex);
             }
             
+            return -1;
+        }
+
+        private int GetColumnIndex(ReportDataExceptions reportData, string headerName)
+        {
+            try
+            {
+                for (var i = 0; i < reportData.Headers.Count; i++)
+                {
+                    if (reportData.Headers[i] == headerName) return i;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.AddDetailedError($"ReportDataManager >>> GetColumnIndex:", ex);
+            }
+
             return -1;
         }
 
